@@ -1,0 +1,11 @@
+.fstate__rect {
+  fill: rgb(var(--surface));
+  rx: 6;
+  ry: 6;
+  stroke: rgb(var(--primary-variant));
+  stroke-width: 2px;
+}
+
+.fstate__text {
+  text-align: center;
+}
