@@ -1,0 +1,103 @@
+:root {
+  --alpha-hover: 0.04;
+  --alpha-focus: 0.12;
+  --alpha-selected: 0.08;
+  --alpha-activated: 0.12;
+  --alpha-pressed: 0.16;
+  --alpha-dragged: 0.08;
+  --alpha-disabled: 0.38;
+
+  /* Colors are defined as rgb to allow usage as rgba */
+  --primary: 224, 224, 224;
+  --primary-variant: 42, 42, 42;
+  --secondary: 96, 168, 242;
+  --secondary-variant: 36, 136, 239;
+  --surface: 255, 255, 255;
+  --error: 176, 0, 32;
+
+  --on-primary: var(--primary-variant);
+  --on-secondary: 255, 255, 255;
+  --on-surface: 0, 0, 0;
+  --on-surface-secondary: rgba(0, 0, 0, 0.6);
+  --on-surface-disabled: rgba(0, 0, 0, var(--alpha-disabled));
+  --on-error: 255, 255, 255;
+
+  --icon-color: var(--secondary);
+
+  --scale-h1: 6rem;
+  --scale-h2: 3.75rem;
+  --scale-h3: 3rem;
+  --scale-h4: 2.125rem;
+  --scale-h5: 1.5rem;
+  --scale-h6: 1.25rem;
+  --scale-body-1: 1rem;
+  --scale-body-2: 0.875rem;
+  --scale-caption: 0.75rem;
+  --scale-button: 0.875rem;
+
+  --line-length: 34rem;
+  --line-length-mobile: 17rem;
+  --line-height: 1.5;
+  --line-height-heading: 1.2;
+  --paragraph-spacing: 1.4em; /* Relative to paragraph font-size */
+
+  --animation-duration-simple: 0.1s;
+  --animation-duration-medium: 0.2s;
+  --animation-duration-complex: 0.5s;
+  --animation-duration-exit: 0.8; /* To be used as multiplier */
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-decelarate: cubic-bezier(0, 0, 0.2, 1);
+  --easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+  /**
+   * Media queries taken from GitHub
+   * @src https://styleguide.github.com/primer/support/breakpoints/
+   *
+   * Also `rem` is bugged from media queries
+   * @src https://zellwk.com/blog/media-query-units/
+   */
+  --media-sm: 34em; /* 544px */
+  --media-md: 48em; /* 768px */
+  --media-lg: 63.25em; /* 1012px */
+  --media-xl: 80rem; /* 1280px */
+
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --shadow-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --shadow-4: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  --shadow-5: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);
+
+  --size-1: 1rem;
+  --size-2: 2rem;
+  --size-3: 4rem;
+  --size-4: 8rem;
+  --size-5: 16rem;
+
+  --size-click-target: 2rem;
+  --size-touch-target: 3rem;
+
+  /**
+   * Spacing taken from Tachyons, MD only recommends to use increments of 8dp
+   * @src http://tachyons.io/docs/layout/spacing/
+   */
+  --spacing-none: 0;
+  --spacing-extra-small: 0.25rem;
+  --spacing-small: 0.5rem;
+  --spacing-medium: 1rem;
+  --spacing-large: 2rem;
+  --spacing-extra-large: 4rem;
+  --spacing-extra-extra-large: 8rem;
+  --spacing-extra-extra-extra-large: 16rem;
+
+  --z-index-text: 0;
+  --z-index-card: 1;
+  --z-index-contained-btn: 2;
+  --z-index-search-is-scrolled: 3;
+  --z-index-top-bar-is-scrolled: 4;
+  --z-index-fab: 6;
+  --z-index-card-is-picked: 8;
+  --z-index-contained-btn-is-pressed: 8;
+  --z-index-fab-is-pressed: 12;
+  --z-index-nav-drawer: 16;
+  --z-index-dialog: 24;
+}

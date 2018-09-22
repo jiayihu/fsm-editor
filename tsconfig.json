@@ -1,0 +1,21 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
+    "declaration": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2015",
+    "lib": [
+      "es2017",
+      "es2018",
+      "dom",
+      "dom.iterable"
+    ]
+  }
+}
