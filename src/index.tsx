@@ -4,6 +4,6 @@ import './css/variables.css';
 
 import React from 'react';
 import { render } from 'react-dom';
-import App from './layout/App/App';
+import { App } from './layout/App/App';
 
 render(<App />, document.getElementById('root'));

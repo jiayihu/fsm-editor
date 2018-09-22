@@ -1,10 +1,10 @@
 import './App.css';
 import React, { Component } from 'react';
-import Canvas from '../../components/Canvas/Canvas';
+import { Canvas } from '../../components/Canvas/Canvas';
 
 type Props = {};
 
-export default class extends Component<Props> {
+export class App extends Component<Props> {
   render() {
     return (
       <div className="app">

@@ -1,28 +1,18 @@
 import './Canvas.css';
 import React, { Component, MouseEvent, createRef, RefObject } from 'react';
-import { ELEMENT } from '../types';
+import { State, reducer } from './state';
+import { CanvasEl } from '../types';
 import { getSVGCoords } from '../../utils/svg';
 import { assertUnreachable } from '../../utils/typescript';
 import { FState, createFState } from '../../domain/fstate';
-import SVGState from '../SVGState/SVGState';
+import { SVGState } from '../SVGState/SVGState';
+import { addState } from './actions';
 
 type Props = {};
 
-type State = {
-  fstates: FState[];
-};
+type CanvasElement = SVGElement & { dataset: { element: CanvasEl | undefined } };
 
-const addState = (fstate: FState) => (state: State) => {
-  const isDuplicate = state.fstates.find(x => {
-    return x.coords.x === fstate.coords.x && x.coords.y === fstate.coords.y;
-  });
-
-  if (!isDuplicate) return { fstates: [...state.fstates, fstate] };
-};
-
-type CanvasElement = SVGElement & { dataset: { element: ELEMENT | undefined } };
-
-export default class Canvas extends Component<Props, State> {
+export class Canvas extends Component<Props, State> {
   svgRef: RefObject<SVGSVGElement>;
 
   constructor(props: Props) {
@@ -36,18 +26,18 @@ export default class Canvas extends Component<Props, State> {
 
   handleClick = (event: MouseEvent<SVGSVGElement>) => {
     const target: CanvasElement = event.target as CanvasElement;
-    const elementType: ELEMENT | undefined = target.dataset.element;
+    const elementType: CanvasEl | undefined = target.dataset.element;
 
     if (!elementType) return;
 
     switch (elementType) {
-      case ELEMENT.state:
+      case CanvasEl.state:
         return;
-      case ELEMENT.grid: {
+      case CanvasEl.grid: {
         const point: SVGPoint = getSVGCoords(this.svgRef.current!, event);
         const fstate: FState = createFState(point);
 
-        this.setState(addState(fstate));
+        this.setState(reducer(this.state, addState(fstate)));
         return;
       }
       default:
@@ -76,7 +66,7 @@ export default class Canvas extends Component<Props, State> {
         </defs>
 
         <rect
-          data-element={ELEMENT.grid}
+          data-element={CanvasEl.grid}
           className="grid"
           width="100%"
           height="100%"
