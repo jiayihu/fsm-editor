@@ -1,7 +1,7 @@
 import './Canvas.css';
 import React, { Component, MouseEvent, createRef, RefObject, ReactNode } from 'react';
 import { State, reducer } from './state';
-import { CanvasEl } from '../types';
+import { ElementType } from '../types';
 import { getSVGCoords } from '../../utils/svg';
 import { assertUnreachable } from '../../utils/typescript';
 import { FState, createFState, isSameFState } from '../../domain/fstate';
@@ -10,7 +10,7 @@ import { addState, editState, resetState, setDragState } from './actions';
 
 type Props = {};
 
-type CanvasElement = SVGElement & { dataset: { element: CanvasEl | undefined } };
+type CanvasElement = SVGElement & { dataset: { element: ElementType | undefined } };
 
 export class Canvas extends Component<Props, State> {
   svgRef: RefObject<SVGSVGElement>;
@@ -23,6 +23,12 @@ export class Canvas extends Component<Props, State> {
       fstates: []
     };
     this.svgRef = createRef();
+  }
+
+  getElementType(event: MouseEvent): ElementType | undefined {
+    const target: CanvasElement = event.target as CanvasElement;
+
+    return target.dataset.element;
   }
 
   componentDidMount() {
@@ -42,15 +48,14 @@ export class Canvas extends Component<Props, State> {
   };
 
   handleDblClick = (event: MouseEvent<SVGSVGElement>) => {
-    const target: CanvasElement = event.target as CanvasElement;
-    const elementType: CanvasEl | undefined = target.dataset.element;
+    const elementType: ElementType | undefined = this.getElementType(event);
 
     if (!elementType) return;
 
     switch (elementType) {
-      case CanvasEl.state:
+      case ElementType.state:
         return;
-      case CanvasEl.grid: {
+      case ElementType.grid: {
         const point: SVGPoint = getSVGCoords(this.svgRef.current!, event);
         const fstate: FState = createFState(point);
 
@@ -62,8 +67,12 @@ export class Canvas extends Component<Props, State> {
     }
   };
 
-  handleDragStart = (fstate: FState) => {
-    this.setState(reducer(this.state, setDragState(fstate, fstate.coords)));
+  handleDragStart = (event: MouseEvent, fstate: FState) => {
+    const elementType: ElementType | undefined = this.getElementType(event);
+
+    if (elementType === ElementType.state) {
+      this.setState(reducer(this.state, setDragState(fstate, fstate.coords)));
+    }
   };
 
   handleDragMove = (event: MouseEvent) => {
@@ -88,7 +97,7 @@ export class Canvas extends Component<Props, State> {
 
       return (
         <g
-          onMouseDown={() => this.handleDragStart(fstate)}
+          onMouseDown={event => this.handleDragStart(event, fstate)}
           key={`${fstate.coords.x} ${fstate.coords.y}`}
         >
           <SVGState
@@ -129,7 +138,7 @@ export class Canvas extends Component<Props, State> {
         </defs>
 
         <rect
-          data-element={CanvasEl.grid}
+          data-element={ElementType.grid}
           className="grid"
           width="100%"
           height="100%"

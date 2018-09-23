@@ -1,4 +1,4 @@
-export enum CanvasEl {
+export enum ElementType {
   grid = 'grid',
   state = 'state'
 }

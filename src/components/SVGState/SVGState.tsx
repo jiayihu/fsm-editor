@@ -1,7 +1,7 @@
 import './SVGState.css';
 import React, { Component, createElement, ReactNode, KeyboardEvent, ChangeEvent } from 'react';
 import { FState } from '../../domain/fstate';
-import { CanvasEl } from '../types';
+import { ElementType } from '../types';
 
 type Props = {
   coords: FState['coords'];
@@ -83,7 +83,7 @@ export class SVGState extends Component<Props, State> {
         <rect
           x={coords.x}
           y={coords.y}
-          data-element={CanvasEl.state}
+          data-element={ElementType.state}
           width={style.width}
           height={style.height}
           className="fstate__rect"
