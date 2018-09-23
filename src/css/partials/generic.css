@@ -23,4 +23,5 @@ h5,
 h6 {
   font-weight: normal;
   line-height: var(--line-height-heading);
+  margin: 0;
 }

@@ -1,4 +1,5 @@
 export enum ElementType {
   grid = 'grid',
-  state = 'state'
+  state = 'state',
+  border = 'border'
 }

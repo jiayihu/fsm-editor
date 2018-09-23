@@ -1,33 +1,53 @@
 import { FState, isSameFState } from '../../domain/fstate';
 import { Action, ActionType } from './actions';
 import { assertUnreachable } from '../../utils/typescript';
-import { withDevtools } from './devtools';
+import { FTransition } from '../../domain/transition';
+// import { withDevtools } from './devtools';
 
 type States =
   | { type: 'READONLY' }
   | {
-      type: 'EDITING';
-      text: string;
+      type: 'DRAGGING';
+      fstate: FState;
+      position: SVGPoint;
     }
   | {
-      type: 'DRAGGING';
+      type: 'DRAWING_LINE';
       fstate: FState;
       position: SVGPoint;
     };
 
 export type State = States & {
   fstates: FState[];
+  ftransitions: FTransition[];
 };
 
-export const reducer = withDevtools(function reducer(state: State, action: Action): State | null {
+export const reducer = function reducer(state: State, action: Action): State | null {
   switch (action.type) {
     case ActionType.RESET_STATE: {
-      return { type: 'READONLY', fstates: state.fstates };
+      return { type: 'READONLY', fstates: state.fstates, ftransitions: state.ftransitions };
     }
     case ActionType.SET_DRAG_STATE: {
       const { fstate, position } = action.payload;
 
-      return { type: 'DRAGGING', fstate, position, fstates: state.fstates };
+      return {
+        type: 'DRAGGING',
+        fstate,
+        position,
+        fstates: state.fstates,
+        ftransitions: state.ftransitions
+      };
+    }
+    case ActionType.SET_LINE_STATE: {
+      const { fstate, position } = action.payload;
+
+      return {
+        type: 'DRAWING_LINE',
+        fstate,
+        position,
+        fstates: state.fstates,
+        ftransitions: state.ftransitions
+      };
     }
     case ActionType.ADD_STATE: {
       const fstate = action.payload;
@@ -35,7 +55,11 @@ export const reducer = withDevtools(function reducer(state: State, action: Actio
 
       if (isDuplicate) return null;
 
-      return { type: 'READONLY', fstates: [...state.fstates, fstate] };
+      return {
+        type: 'READONLY',
+        fstates: [...state.fstates, fstate],
+        ftransitions: state.ftransitions
+      };
     }
     case ActionType.EDIT_STATE: {
       const fstate = action.payload;
@@ -47,9 +71,9 @@ export const reducer = withDevtools(function reducer(state: State, action: Actio
         return x;
       });
 
-      return { type: 'READONLY', fstates };
+      return { type: 'READONLY', fstates, ftransitions: state.ftransitions };
     }
     default:
       return assertUnreachable(action);
   }
-});
+};

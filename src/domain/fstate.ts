@@ -19,7 +19,7 @@ export function createFState(coords: SVGPoint): FState {
     id: generatedId('fstate'),
     coords,
     text: 'State',
-    style: { width: 100, height: 40, fontSize: 24 }
+    style: { width: 100, height: 48, fontSize: 24 }
   };
 }
 

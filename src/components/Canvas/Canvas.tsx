@@ -6,7 +6,9 @@ import { getSVGCoords } from '../../utils/svg';
 import { assertUnreachable } from '../../utils/typescript';
 import { FState, createFState, isSameFState } from '../../domain/fstate';
 import { SVGState } from '../SVGState/SVGState';
-import { addState, editState, resetState, setDragState } from './actions';
+import { SVGBorder } from '../SVGBorder/SVGBorder';
+import { addState, editState, resetState, setDragState, setLineState } from './actions';
+import SVGTransition from '../SVGTransition/SVGTransition';
 
 type Props = {};
 
@@ -20,7 +22,8 @@ export class Canvas extends Component<Props, State> {
 
     this.state = {
       type: 'READONLY',
-      fstates: []
+      fstates: [],
+      ftransitions: []
     };
     this.svgRef = createRef();
   }
@@ -54,6 +57,7 @@ export class Canvas extends Component<Props, State> {
 
     switch (elementType) {
       case ElementType.state:
+      case ElementType.border:
         return;
       case ElementType.grid: {
         const point: SVGPoint = getSVGCoords(this.svgRef.current!, event);
@@ -67,7 +71,7 @@ export class Canvas extends Component<Props, State> {
     }
   };
 
-  handleDragStart = (event: MouseEvent, fstate: FState) => {
+  handleMouseDown = (event: MouseEvent, fstate: FState) => {
     const elementType: ElementType | undefined = this.getElementType(event);
 
     if (elementType === ElementType.state) {
@@ -75,20 +79,33 @@ export class Canvas extends Component<Props, State> {
     }
   };
 
-  handleDragMove = (event: MouseEvent) => {
-    if (!this.svgRef.current || this.state.type !== 'DRAGGING') return;
+  handleMouseMove = (event: MouseEvent) => {
+    if (!this.svgRef.current) return;
 
-    const position = getSVGCoords(this.svgRef.current, event);
+    if (this.state.type === 'DRAGGING') {
+      const position = getSVGCoords(this.svgRef.current, event);
+      this.setState(reducer(this.state, setDragState(this.state.fstate, position)));
+    }
 
-    this.setState(reducer(this.state, setDragState(this.state.fstate, position)));
+    if (this.state.type === 'DRAWING_LINE') {
+      const position = getSVGCoords(this.svgRef.current, event);
+      this.setState(reducer(this.state, setLineState(this.state.fstate, position)));
+    }
   };
 
-  handleDragEnd = () => {
-    if (this.state.type !== 'DRAGGING') return;
+  handleMouseUp = () => {
+    if (this.state.type === 'DRAGGING') {
+      const fstate: FState = { ...this.state.fstate, coords: this.state.position };
+      this.setState(reducer(this.state, editState(fstate)));
+    }
+  };
 
-    const fstate: FState = { ...this.state.fstate, coords: this.state.position };
+  handleMouseLeave = () => {
+    this.setState(reducer(this.state, resetState()));
+  };
 
-    this.setState(reducer(this.state, editState(fstate)));
+  handleTransitionStart = (_: MouseEvent<SVGRectElement>, fstate: FState) => {
+    this.setState(reducer(this.state, setLineState(fstate, fstate.coords)));
   };
 
   renderFStates(fstates: FState[]): ReactNode {
@@ -97,7 +114,7 @@ export class Canvas extends Component<Props, State> {
 
       return (
         <g
-          onMouseDown={event => this.handleDragStart(event, fstate)}
+          onMouseDown={event => this.handleMouseDown(event, fstate)}
           key={`${fstate.coords.x} ${fstate.coords.y}`}
         >
           <SVGState
@@ -110,6 +127,7 @@ export class Canvas extends Component<Props, State> {
               this.setState(reducer(this.state, editState({ ...fstate, text })))
             }
           />
+          <SVGBorder fstate={fstate} onClick={this.handleTransitionStart} />
         </g>
       );
     });
@@ -124,8 +142,9 @@ export class Canvas extends Component<Props, State> {
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
         onDoubleClick={this.handleDblClick}
-        onMouseMove={this.handleDragMove}
-        onMouseUp={this.handleDragEnd}
+        onMouseMove={this.handleMouseMove}
+        onMouseUp={this.handleMouseUp}
+        onMouseLeave={this.handleMouseLeave}
       >
         <defs>
           <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
@@ -135,6 +154,18 @@ export class Canvas extends Component<Props, State> {
             <rect width="100" height="100" fill="url(#smallGrid)" />
             <path d="M 100 0 L 0 0 0 100" fill="none" stroke="gray" strokeWidth="1" />
           </pattern>
+
+          <marker
+            id="marker-arrow"
+            viewBox="0 0 10 10"
+            refX="5"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" />
+          </marker>
         </defs>
 
         <rect
@@ -146,6 +177,9 @@ export class Canvas extends Component<Props, State> {
         />
 
         {this.renderFStates(this.state.fstates)}
+        {this.state.type === 'DRAWING_LINE' ? (
+          <SVGTransition type="DRAWING" fstate={this.state.fstate} position={this.state.position} />
+        ) : null}
       </svg>
     );
   }

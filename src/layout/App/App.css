@@ -20,7 +20,6 @@
 .app__footer {
   background-color: rgb(var(--primary-variant));
   color: rgb(var(--on-secondary));
-  padding: var(--spacing-medium) 0;
 }
 
 @media screen and (min-width: 1088px) {
