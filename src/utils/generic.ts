@@ -7,6 +7,20 @@ export function debounce<F extends (...params: Array<any>) => void>(fn: F, delay
   } as F;
 }
 
+export function generatedId(prefix: string): string {
+  /**
+   * Poor man's unique id
+   * @see {@link https://gist.github.com/gordonbrander/2230317}
+   */
+  return (
+    prefix +
+    '_' +
+    Math.random()
+      .toString(36)
+      .substr(2, 9)
+  );
+}
+
 /**
  * Type `: {}` is equivalent to `: object | string | boolean | symbol | number`
  * or Flow's `: mixed`

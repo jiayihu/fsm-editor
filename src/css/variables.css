@@ -53,7 +53,7 @@
    * Media queries taken from GitHub
    * @src https://styleguide.github.com/primer/support/breakpoints/
    *
-   * Also `rem` is bugged from media queries
+   * Also `rem` is bugged in media queries
    * @src https://zellwk.com/blog/media-query-units/
    */
   --media-sm: 34em; /* 544px */

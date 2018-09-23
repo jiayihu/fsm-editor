@@ -1,12 +1,12 @@
 import './Canvas.css';
-import React, { Component, MouseEvent, createRef, RefObject } from 'react';
+import React, { Component, MouseEvent, createRef, RefObject, ReactNode } from 'react';
 import { State, reducer } from './state';
 import { CanvasEl } from '../types';
 import { getSVGCoords } from '../../utils/svg';
 import { assertUnreachable } from '../../utils/typescript';
-import { FState, createFState } from '../../domain/fstate';
+import { FState, createFState, isSameFState } from '../../domain/fstate';
 import { SVGState } from '../SVGState/SVGState';
-import { addState, editStateText } from './actions';
+import { addState, editState, resetState, setDragState } from './actions';
 
 type Props = {};
 
@@ -19,10 +19,27 @@ export class Canvas extends Component<Props, State> {
     super(props);
 
     this.state = {
+      type: 'READONLY',
       fstates: []
     };
     this.svgRef = createRef();
   }
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.handleKeyDown as any);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.handleKeyDown as any);
+  }
+
+  handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+      case 'Escape':
+        this.setState(reducer(this.state, resetState()));
+        return;
+    }
+  };
 
   handleDblClick = (event: MouseEvent<SVGSVGElement>) => {
     const target: CanvasElement = event.target as CanvasElement;
@@ -45,6 +62,50 @@ export class Canvas extends Component<Props, State> {
     }
   };
 
+  handleDragStart = (fstate: FState) => {
+    this.setState(reducer(this.state, setDragState(fstate, fstate.coords)));
+  };
+
+  handleDragMove = (event: MouseEvent) => {
+    if (!this.svgRef.current || this.state.type !== 'DRAGGING') return;
+
+    const position = getSVGCoords(this.svgRef.current, event);
+
+    this.setState(reducer(this.state, setDragState(this.state.fstate, position)));
+  };
+
+  handleDragEnd = () => {
+    if (this.state.type !== 'DRAGGING') return;
+
+    const fstate: FState = { ...this.state.fstate, coords: this.state.position };
+
+    this.setState(reducer(this.state, editState(fstate)));
+  };
+
+  renderFStates(fstates: FState[]): ReactNode {
+    return fstates.map(fstate => {
+      const isDragged = this.state.type === 'DRAGGING' && isSameFState(fstate, this.state.fstate);
+
+      return (
+        <g
+          onMouseDown={() => this.handleDragStart(fstate)}
+          key={`${fstate.coords.x} ${fstate.coords.y}`}
+        >
+          <SVGState
+            {...fstate}
+            coords={
+              this.state.type === 'DRAGGING' && isDragged ? this.state.position : fstate.coords
+            }
+            svgEl={this.svgRef.current}
+            onTextChange={(text: string) =>
+              this.setState(reducer(this.state, editState({ ...fstate, text })))
+            }
+          />
+        </g>
+      );
+    });
+  }
+
   render() {
     return (
       <svg
@@ -54,6 +115,8 @@ export class Canvas extends Component<Props, State> {
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
         onDoubleClick={this.handleDblClick}
+        onMouseMove={this.handleDragMove}
+        onMouseUp={this.handleDragEnd}
       >
         <defs>
           <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
@@ -73,15 +136,7 @@ export class Canvas extends Component<Props, State> {
           fill="url(#grid)"
         />
 
-        {this.state.fstates.map(fstate => (
-          <SVGState
-            fstate={fstate}
-            key={`${fstate.coords.x} ${fstate.coords.y}`}
-            onTextChange={(text: string) =>
-              this.setState(reducer(this.state, editStateText(fstate, text)))
-            }
-          />
-        ))}
+        {this.renderFStates(this.state.fstates)}
       </svg>
     );
   }

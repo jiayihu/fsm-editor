@@ -1,10 +1,14 @@
 import './SVGState.css';
-import React, { Component, createElement, ReactNode, ChangeEvent } from 'react';
+import React, { Component, createElement, ReactNode, KeyboardEvent, ChangeEvent } from 'react';
 import { FState } from '../../domain/fstate';
 import { CanvasEl } from '../types';
 
 type Props = {
-  fstate: FState;
+  coords: FState['coords'];
+  text: FState['text'];
+  style: FState['style'];
+
+  svgEl: SVGSVGElement | null;
   onTextChange: (text: string) => void;
 };
 
@@ -21,8 +25,19 @@ export class SVGState extends Component<Props, State> {
     this.state = { type: 'READONLY' };
   }
 
+  handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+      case 'Escape':
+        this.setState({ type: 'READONLY' });
+        return;
+      case 'Enter':
+        this.handleTextBlur();
+        return;
+    }
+  };
+
   handleDblClick = () => {
-    this.setState({ type: 'EDITING', text: this.props.fstate.text });
+    this.setState({ type: 'EDITING', text: this.props.text });
   };
 
   handleTextChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -36,37 +51,35 @@ export class SVGState extends Component<Props, State> {
     this.setState({ type: 'READONLY' });
   };
 
-  renderStaticText(text: string): ReactNode {
-    return <span onDoubleClick={this.handleDblClick}>{text}</span>;
-  }
-
-  renderEditingText(text: string): ReactNode {
-    return (
-      <input
-        autoFocus
-        className="fstate__input"
-        type="text"
-        value={text}
-        onChange={this.handleTextChange}
-        onBlur={this.handleTextBlur}
-      />
-    );
+  renderText(): ReactNode {
+    switch (this.state.type) {
+      case 'READONLY':
+        return <span onDoubleClick={this.handleDblClick}>{this.props.text}</span>;
+      case 'EDITING':
+        return (
+          <input
+            autoFocus
+            className="fstate__input"
+            type="text"
+            value={this.state.text}
+            onChange={this.handleTextChange}
+            onBlur={this.handleTextBlur}
+          />
+        );
+    }
   }
 
   render() {
-    const { fstate } = this.props;
-    const { coords, text, style } = fstate;
+    const { coords, text, style } = this.props;
     // Use `createElement` because TS doesn't allow `xmlsn` on div
     const textEl = createElement(
       'div',
       { className: 'fstate__text', xmlns: 'http://www.w3.org/1999/xhtml' },
-      this.state.type === 'READONLY'
-        ? this.renderStaticText(text)
-        : this.renderEditingText(this.state.text)
+      this.renderText()
     );
 
     return (
-      <g className="fstate">
+      <g className="fstate" onKeyDown={this.handleKeyDown}>
         <rect
           x={coords.x}
           y={coords.y}
