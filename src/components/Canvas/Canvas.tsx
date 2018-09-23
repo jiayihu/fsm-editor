@@ -6,7 +6,7 @@ import { getSVGCoords } from '../../utils/svg';
 import { assertUnreachable } from '../../utils/typescript';
 import { FState, createFState } from '../../domain/fstate';
 import { SVGState } from '../SVGState/SVGState';
-import { addState } from './actions';
+import { addState, editStateText } from './actions';
 
 type Props = {};
 
@@ -24,7 +24,7 @@ export class Canvas extends Component<Props, State> {
     this.svgRef = createRef();
   }
 
-  handleClick = (event: MouseEvent<SVGSVGElement>) => {
+  handleDblClick = (event: MouseEvent<SVGSVGElement>) => {
     const target: CanvasElement = event.target as CanvasElement;
     const elementType: CanvasEl | undefined = target.dataset.element;
 
@@ -53,7 +53,7 @@ export class Canvas extends Component<Props, State> {
         height="100%"
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
-        onClick={this.handleClick}
+        onDoubleClick={this.handleDblClick}
       >
         <defs>
           <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
@@ -74,7 +74,13 @@ export class Canvas extends Component<Props, State> {
         />
 
         {this.state.fstates.map(fstate => (
-          <SVGState fstate={fstate} key={`${fstate.coords.x} ${fstate.coords.y}`} />
+          <SVGState
+            fstate={fstate}
+            key={`${fstate.coords.x} ${fstate.coords.y}`}
+            onTextChange={(text: string) =>
+              this.setState(reducer(this.state, editStateText(fstate, text)))
+            }
+          />
         ))}
       </svg>
     );
