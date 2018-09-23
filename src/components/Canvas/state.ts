@@ -1,6 +1,7 @@
 import { FState, isSameFState } from '../../domain/fstate';
 import { Action, ActionType } from './actions';
 import { assertUnreachable } from '../../utils/typescript';
+import { withDevtools } from './devtools';
 
 type States =
   | { type: 'READONLY' }
@@ -18,7 +19,7 @@ export type State = States & {
   fstates: FState[];
 };
 
-export function reducer(state: State, action: Action): State | null {
+export const reducer = withDevtools(function reducer(state: State, action: Action): State | null {
   switch (action.type) {
     case ActionType.RESET_STATE: {
       return { type: 'READONLY', fstates: state.fstates };
@@ -51,4 +52,4 @@ export function reducer(state: State, action: Action): State | null {
     default:
       return assertUnreachable(action);
   }
-}
+});
