@@ -1,7 +1,8 @@
 import { FState, isSameFState } from '../../domain/fstate';
 import { Action, ActionType } from './actions';
 import { assertUnreachable } from '../../utils/typescript';
-import { FTransition } from '../../domain/transition';
+import { FTransition, isSameFTransition } from '../../domain/transition';
+import { Point } from '../../domain/point';
 // import { withDevtools } from './devtools';
 
 type States =
@@ -9,12 +10,12 @@ type States =
   | {
       type: 'DRAGGING';
       fstate: FState;
-      position: SVGPoint;
+      position: Point;
     }
   | {
       type: 'DRAWING_LINE';
       fstate: FState;
-      position: SVGPoint;
+      position: Point;
     };
 
 export type State = States & {
@@ -71,7 +72,46 @@ export const reducer = function reducer(state: State, action: Action): State | n
         return x;
       });
 
-      return { type: 'READONLY', fstates, ftransitions: state.ftransitions };
+      // Update also in transitions involving the changed state
+      const ftransitions = state.ftransitions.map(ftransition => {
+        if (isSameFState(ftransition.fromState, fstate)) {
+          console.log('transition from');
+          return { ...ftransition, fromState: fstate };
+        }
+
+        if (isSameFState(ftransition.toState, fstate)) {
+          console.log('transition to');
+          return { ...ftransition, toState: fstate };
+        }
+
+        return ftransition;
+      });
+
+      return { type: 'READONLY', fstates, ftransitions };
+    }
+    case ActionType.ADD_TRANSITION: {
+      const ftransition = action.payload;
+      const isDuplicate = state.ftransitions.find(x => isSameFTransition(x, ftransition));
+
+      if (isDuplicate) return null;
+
+      return {
+        type: 'READONLY',
+        fstates: state.fstates,
+        ftransitions: [...state.ftransitions, ftransition]
+      };
+    }
+    case ActionType.EDIT_TRANSITION: {
+      const ftransition = action.payload;
+      const ftransitions = state.ftransitions.map(x => {
+        if (isSameFTransition(x, ftransition)) {
+          return ftransition;
+        }
+
+        return x;
+      });
+
+      return { type: 'READONLY', ftransitions, fstates: state.fstates };
     }
     default:
       return assertUnreachable(action);

@@ -1,11 +1,12 @@
 import { generatedId } from '../utils/generic';
+import { Point } from './point';
 
 /**
  * Finite state, not to be confused with React State
  */
 export type FState = {
   id: string;
-  coords: SVGPoint;
+  coords: Point;
   text: string;
   style: {
     width: number;
@@ -14,7 +15,7 @@ export type FState = {
   };
 };
 
-export function createFState(coords: SVGPoint): FState {
+export function createFState(coords: Point): FState {
   return {
     id: generatedId('fstate'),
     coords,

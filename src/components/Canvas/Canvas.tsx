@@ -7,8 +7,17 @@ import { assertUnreachable } from '../../utils/typescript';
 import { FState, createFState, isSameFState } from '../../domain/fstate';
 import { SVGState } from '../SVGState/SVGState';
 import { SVGBorder } from '../SVGBorder/SVGBorder';
-import { addState, editState, resetState, setDragState, setLineState } from './actions';
+import {
+  addState,
+  editState,
+  resetState,
+  setDragState,
+  setLineState,
+  addTransition
+} from './actions';
 import SVGTransition from '../SVGTransition/SVGTransition';
+import { createFTransition, FTransition } from '../../domain/transition';
+import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
 
 type Props = {};
 
@@ -48,6 +57,10 @@ export class Canvas extends Component<Props, State> {
         this.setState(reducer(this.state, resetState()));
         return;
     }
+  };
+
+  handleClick = (_: MouseEvent<SVGSVGElement>) => {
+    // Noop
   };
 
   handleDblClick = (event: MouseEvent<SVGSVGElement>) => {
@@ -104,8 +117,17 @@ export class Canvas extends Component<Props, State> {
     this.setState(reducer(this.state, resetState()));
   };
 
-  handleTransitionStart = (_: MouseEvent<SVGRectElement>, fstate: FState) => {
-    this.setState(reducer(this.state, setLineState(fstate, fstate.coords)));
+  handleBorderClick = (event: MouseEvent<SVGRectElement>, fstate: FState) => {
+    if (this.state.type !== 'DRAWING_LINE') {
+      return this.setState(reducer(this.state, setLineState(fstate, fstate.coords)));
+    }
+
+    // Check if the clicked state, while drawing a transition, is not the origin state
+    if (fstate !== this.state.fstate) {
+      const ftransition = createFTransition(this.state.fstate, fstate);
+
+      return this.setState(reducer(this.state, addTransition(ftransition)));
+    }
   };
 
   renderFStates(fstates: FState[]): ReactNode {
@@ -127,20 +149,112 @@ export class Canvas extends Component<Props, State> {
               this.setState(reducer(this.state, editState({ ...fstate, text })))
             }
           />
-          <SVGBorder fstate={fstate} onClick={this.handleTransitionStart} />
+          {this.state.type !== 'DRAGGING' && (
+            <SVGBorder fstate={fstate} onClick={this.handleBorderClick} />
+          )}
         </g>
       );
     });
   }
 
+  renderFTransitions(ftransitions: FTransition[]): ReactNode {
+    return ftransitions.map(ftransition => {
+      if (this.state.type === 'DRAGGING') {
+        const { position } = this.state;
+        const isFrom = isSameFState(ftransition.fromState, this.state.fstate);
+        const isTo = isSameFState(ftransition.toState, this.state.fstate);
+
+        if (isFrom || isTo) {
+          if (isFrom) {
+            /** @TODO: refactoring as extracted utility */
+            const fromPosition = getNearestPointInPerimeter(
+              position.x,
+              position.y,
+              ftransition.fromState.style.width,
+              ftransition.fromState.style.height,
+              ftransition.toState.coords.x,
+              ftransition.toState.coords.y
+            );
+            const toPosition = getNearestPointInPerimeter(
+              ftransition.toState.coords.x,
+              ftransition.toState.coords.y,
+              ftransition.fromState.style.width,
+              ftransition.fromState.style.height,
+              fromPosition.x,
+              fromPosition.y
+            );
+
+            return (
+              <SVGTransition
+                type="DRAWING"
+                fromPosition={fromPosition}
+                toPosition={toPosition}
+                key={ftransition.id}
+              />
+            );
+          }
+
+          if (isTo) {
+            const toPosition = getNearestPointInPerimeter(
+              position.x,
+              position.y,
+              ftransition.toState.style.width,
+              ftransition.toState.style.height,
+              ftransition.fromState.coords.x,
+              ftransition.fromState.coords.y
+            );
+            const fromPosition = getNearestPointInPerimeter(
+              ftransition.fromState.coords.x,
+              ftransition.fromState.coords.y,
+              ftransition.fromState.style.width,
+              ftransition.fromState.style.height,
+              toPosition.x,
+              toPosition.y
+            );
+
+            return (
+              <SVGTransition
+                type="DRAWING"
+                fromPosition={fromPosition}
+                toPosition={toPosition}
+                key={ftransition.id}
+              />
+            );
+          }
+        }
+      }
+
+      return <SVGTransition type="READONLY" ftransition={ftransition} key={ftransition.id} />;
+    });
+  }
+
+  renderDrawingLine() {
+    if (this.state.type !== 'DRAWING_LINE') return null;
+
+    const { fstate, position } = this.state;
+
+    const fromPosition = getNearestPointInPerimeter(
+      fstate.coords.x,
+      fstate.coords.y,
+      fstate.style.width,
+      fstate.style.height,
+      position.x,
+      position.y
+    );
+
+    return <SVGTransition type="DRAWING" fromPosition={fromPosition} toPosition={position} />;
+  }
+
   render() {
     return (
       <svg
+        className="canvas"
         ref={this.svgRef}
         width="100%"
         height="100%"
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
+        onClick={this.handleClick}
         onDoubleClick={this.handleDblClick}
         onMouseMove={this.handleMouseMove}
         onMouseUp={this.handleMouseUp}
@@ -177,9 +291,8 @@ export class Canvas extends Component<Props, State> {
         />
 
         {this.renderFStates(this.state.fstates)}
-        {this.state.type === 'DRAWING_LINE' ? (
-          <SVGTransition type="DRAWING" fstate={this.state.fstate} position={this.state.position} />
-        ) : null}
+        {this.renderFTransitions(this.state.ftransitions)}
+        {this.renderDrawingLine()}
       </svg>
     );
   }

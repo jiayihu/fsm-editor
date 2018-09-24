@@ -1,3 +1,7 @@
+.canvas {
+  user-select: none; /* Disable text selection when dragging */
+}
+
 #marker-arrow path {
   fill: rgb(var(--primary-variant));
 }

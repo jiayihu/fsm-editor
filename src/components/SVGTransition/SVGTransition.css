@@ -3,3 +3,7 @@
   stroke: black;
   stroke-width: 2px;
 }
+
+.ftransition--drawing {
+  pointer-events: none;
+}

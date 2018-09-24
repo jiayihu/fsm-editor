@@ -1,10 +1,4 @@
-/**
- * JS porting of https://stackoverflow.com/questions/20453545/how-to-find-the-nearest-point-in-the-perimeter-of-a-rectangle-to-a-given-point
- */
-
-function clamp(x: number, lower: number, upper: number): number {
-  return Math.max(lower, Math.min(upper, x));
-}
+import { createPoint, Point } from '../../domain/point';
 
 export function getNearestPointInPerimeter(
   l: number,
@@ -13,21 +7,19 @@ export function getNearestPointInPerimeter(
   h: number,
   x: number,
   y: number
-) {
-  const r = l + w;
-  const b = t + h;
+): Point {
+  const midW = w / 2;
+  const midH = h / 2;
 
-  x = clamp(x, l, r);
-  y = clamp(y, t, b);
+  const anchors: [number, number][] = [
+    [l + midW, t],
+    [l, t + midH],
+    [l + w, t + midH],
+    [l + midW, t + h]
+  ];
+  const distances = anchors.map(([x1, y1]) => Math.sqrt((x - x1) ** 2 + (y - y1) ** 2));
+  const nearestIndex = distances.indexOf(Math.min(...distances));
+  const point = anchors[nearestIndex];
 
-  const dl = Math.abs(x - l);
-  const dr = Math.abs(x - r);
-  const dt = Math.abs(y - t);
-  const db = Math.abs(y - b);
-  const m = Math.min(dl, dr, dt, db);
-
-  if (m == dt) return { x: x, y: t };
-  if (m == db) return { x: x, y: b };
-  if (m == dl) return { x: l, y: y };
-  return { x: r, y: y };
+  return createPoint(point[0], point[1]);
 }

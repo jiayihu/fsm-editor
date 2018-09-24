@@ -1,11 +1,11 @@
 import './SVGTransition.css';
 import React, { Component, ReactNode } from 'react';
 import { FTransition } from '../../domain/transition';
-import { FState } from '../../domain/fstate';
 import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
+import { Point } from '../../domain/point';
 
 type Props =
-  | { type: 'DRAWING'; fstate: FState; position: SVGPoint }
+  | { type: 'DRAWING'; fromPosition: Point; toPosition: Point }
   | {
       type: 'READONLY';
       ftransition: FTransition;
@@ -18,13 +18,30 @@ export default class SVGTransition extends Component<Props> {
     const ftransition = this.props.ftransition;
     const { fromState, toState } = ftransition;
 
+    const fromPosition = getNearestPointInPerimeter(
+      fromState.coords.x,
+      fromState.coords.y,
+      fromState.style.width,
+      fromState.style.height,
+      toState.coords.x,
+      toState.coords.y
+    );
+    const toPosition = getNearestPointInPerimeter(
+      toState.coords.x,
+      toState.coords.y,
+      toState.style.width,
+      toState.style.height,
+      fromPosition.x,
+      fromPosition.y
+    );
+
     return (
       <line
         className="ftransition"
-        x1={fromState.coords.x}
-        y1={fromState.coords.y}
-        x2={toState.coords.x}
-        y2={toState.coords.y}
+        x1={fromPosition.x}
+        y1={fromPosition.y}
+        x2={toPosition.x}
+        y2={toPosition.y}
       />
     );
   }
@@ -32,23 +49,16 @@ export default class SVGTransition extends Component<Props> {
   renderDrawingLine(): ReactNode {
     if (this.props.type !== 'DRAWING') return null;
 
-    const { fstate, position } = this.props;
-    const {
-      coords,
-      style: { width, height }
-    } = fstate;
-
-    const origin = getNearestPointInPerimeter(
-      coords.x,
-      coords.y,
-      width,
-      height,
-      position.x,
-      position.y
-    );
+    const { fromPosition, toPosition } = this.props;
 
     return (
-      <line className="ftransition" x1={origin.x} y1={origin.y} x2={position.x} y2={position.y} />
+      <line
+        className="ftransition ftransition--drawing"
+        x1={fromPosition.x}
+        y1={fromPosition.y}
+        x2={toPosition.x}
+        y2={toPosition.y}
+      />
     );
   }
 
