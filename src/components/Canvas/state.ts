@@ -2,7 +2,7 @@ import { FState, isSameFState } from '../../domain/fstate';
 import { Action, ActionType } from './actions';
 import { assertUnreachable } from '../../utils/typescript';
 import { FTransition, isSameFTransition } from '../../domain/transition';
-import { Point } from '../../domain/point';
+import { Point } from '../../domain/geometry';
 // import { withDevtools } from './devtools';
 
 type States =

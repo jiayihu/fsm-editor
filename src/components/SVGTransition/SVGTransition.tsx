@@ -2,7 +2,7 @@ import './SVGTransition.css';
 import React, { Component, ReactNode } from 'react';
 import { FTransition } from '../../domain/transition';
 import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
-import { Point } from '../../domain/point';
+import { Point } from '../../domain/geometry';
 
 type Props =
   | { type: 'DRAWING'; fromPosition: Point; toPosition: Point }

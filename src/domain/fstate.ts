@@ -1,5 +1,5 @@
 import { generatedId } from '../utils/generic';
-import { Point } from './point';
+import { Point } from './geometry';
 
 /**
  * Finite state, not to be confused with React State

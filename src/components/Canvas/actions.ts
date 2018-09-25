@@ -1,6 +1,6 @@
 import { FState } from '../../domain/fstate';
 import { FTransition } from '../../domain/transition';
-import { Point } from '../../domain/point';
+import { Point } from '../../domain/geometry';
 
 export const enum ActionType {
   RESET_STATE = 'RESET_STATE',

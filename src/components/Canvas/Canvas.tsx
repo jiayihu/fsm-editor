@@ -18,6 +18,7 @@ import {
 import SVGTransition from '../SVGTransition/SVGTransition';
 import { createFTransition, FTransition } from '../../domain/transition';
 import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
+import { Point } from '../../domain/geometry';
 
 type Props = {};
 
@@ -41,6 +42,27 @@ export class Canvas extends Component<Props, State> {
     const target: CanvasElement = event.target as CanvasElement;
 
     return target.dataset.element;
+  }
+
+  getLineOfMovingState(position: Point, movingState: FState, staticState: FState) {
+    const start = getNearestPointInPerimeter(
+      position.x,
+      position.y,
+      movingState.style.width,
+      movingState.style.height,
+      staticState.coords.x,
+      staticState.coords.y
+    );
+    const end = getNearestPointInPerimeter(
+      staticState.coords.x,
+      staticState.coords.y,
+      staticState.style.width,
+      staticState.style.height,
+      start.x,
+      start.y
+    );
+
+    return { start, end };
   }
 
   componentDidMount() {
@@ -161,66 +183,23 @@ export class Canvas extends Component<Props, State> {
     return ftransitions.map(ftransition => {
       if (this.state.type === 'DRAGGING') {
         const { position } = this.state;
-        const isFrom = isSameFState(ftransition.fromState, this.state.fstate);
-        const isTo = isSameFState(ftransition.toState, this.state.fstate);
+        const { fromState, toState } = ftransition;
+        const isFrom = isSameFState(fromState, this.state.fstate);
+        const isTo = isSameFState(toState, this.state.fstate);
 
         if (isFrom || isTo) {
-          if (isFrom) {
-            /** @TODO: refactoring as extracted utility */
-            const fromPosition = getNearestPointInPerimeter(
-              position.x,
-              position.y,
-              ftransition.fromState.style.width,
-              ftransition.fromState.style.height,
-              ftransition.toState.coords.x,
-              ftransition.toState.coords.y
-            );
-            const toPosition = getNearestPointInPerimeter(
-              ftransition.toState.coords.x,
-              ftransition.toState.coords.y,
-              ftransition.fromState.style.width,
-              ftransition.fromState.style.height,
-              fromPosition.x,
-              fromPosition.y
-            );
+          const movingState = isFrom ? fromState : toState;
+          const staticState = isFrom ? toState : fromState;
+          const { start, end } = this.getLineOfMovingState(position, movingState, staticState);
 
-            return (
-              <SVGTransition
-                type="DRAWING"
-                fromPosition={fromPosition}
-                toPosition={toPosition}
-                key={ftransition.id}
-              />
-            );
-          }
-
-          if (isTo) {
-            const toPosition = getNearestPointInPerimeter(
-              position.x,
-              position.y,
-              ftransition.toState.style.width,
-              ftransition.toState.style.height,
-              ftransition.fromState.coords.x,
-              ftransition.fromState.coords.y
-            );
-            const fromPosition = getNearestPointInPerimeter(
-              ftransition.fromState.coords.x,
-              ftransition.fromState.coords.y,
-              ftransition.fromState.style.width,
-              ftransition.fromState.style.height,
-              toPosition.x,
-              toPosition.y
-            );
-
-            return (
-              <SVGTransition
-                type="DRAWING"
-                fromPosition={fromPosition}
-                toPosition={toPosition}
-                key={ftransition.id}
-              />
-            );
-          }
+          return (
+            <SVGTransition
+              type="DRAWING"
+              fromPosition={isFrom ? start : end}
+              toPosition={isFrom ? end : start}
+              key={ftransition.id}
+            />
+          );
         }
       }
 
@@ -272,7 +251,7 @@ export class Canvas extends Component<Props, State> {
           <marker
             id="marker-arrow"
             viewBox="0 0 10 10"
-            refX="5"
+            refX="10"
             refY="5"
             markerWidth="6"
             markerHeight="6"

@@ -1,4 +1,4 @@
-import { createPoint, Point } from '../../domain/point';
+import { createPoint, Point } from '../../domain/geometry';
 
 export function getNearestPointInPerimeter(
   l: number,
