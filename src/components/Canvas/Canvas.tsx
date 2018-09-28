@@ -13,7 +13,9 @@ import {
   resetState,
   setDragState,
   setLineState,
-  addTransition
+  addTransition,
+  Action,
+  deleteState
 } from './actions';
 import SVGTransition from '../SVGTransition/SVGTransition';
 import { createFTransition, FTransition } from '../../domain/transition';
@@ -36,6 +38,10 @@ export class Canvas extends Component<Props, State> {
       ftransitions: []
     };
     this.svgRef = createRef();
+  }
+
+  dispatch(action: Action) {
+    this.setState(state => reducer(state, action));
   }
 
   getElementType(event: MouseEvent): ElementType | undefined {
@@ -76,7 +82,7 @@ export class Canvas extends Component<Props, State> {
   handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
       case 'Escape':
-        this.setState(reducer(this.state, resetState()));
+        this.dispatch(resetState());
         return;
     }
   };
@@ -98,7 +104,7 @@ export class Canvas extends Component<Props, State> {
         const point: SVGPoint = getSVGCoords(this.svgRef.current!, event);
         const fstate: FState = createFState(point);
 
-        this.setState(reducer(this.state, addState(fstate)));
+        this.dispatch(addState(fstate));
         return;
       }
       default:
@@ -110,7 +116,7 @@ export class Canvas extends Component<Props, State> {
     const elementType: ElementType | undefined = this.getElementType(event);
 
     if (elementType === ElementType.state) {
-      this.setState(reducer(this.state, setDragState(fstate, fstate.coords)));
+      this.dispatch(setDragState(fstate, fstate.coords));
     }
   };
 
@@ -119,37 +125,41 @@ export class Canvas extends Component<Props, State> {
 
     if (this.state.type === 'DRAGGING') {
       const position = getSVGCoords(this.svgRef.current, event);
-      this.setState(reducer(this.state, setDragState(this.state.fstate, position)));
+      this.dispatch(setDragState(this.state.fstate, position));
     }
 
     if (this.state.type === 'DRAWING_LINE') {
       const position = getSVGCoords(this.svgRef.current, event);
-      this.setState(reducer(this.state, setLineState(this.state.fstate, position)));
+      this.dispatch(setLineState(this.state.fstate, position));
     }
   };
 
   handleMouseUp = () => {
     if (this.state.type === 'DRAGGING') {
       const fstate: FState = { ...this.state.fstate, coords: this.state.position };
-      this.setState(reducer(this.state, editState(fstate)));
+      this.dispatch(editState(fstate));
     }
   };
 
   handleMouseLeave = () => {
-    this.setState(reducer(this.state, resetState()));
+    this.dispatch(resetState());
   };
 
-  handleBorderClick = (event: MouseEvent<SVGRectElement>, fstate: FState) => {
+  handleBorderClick = (fstate: FState) => {
     if (this.state.type !== 'DRAWING_LINE') {
-      return this.setState(reducer(this.state, setLineState(fstate, fstate.coords)));
+      return this.dispatch(setLineState(fstate, fstate.coords));
     }
 
     // Check if the clicked state, while drawing a transition, is not the origin state
     if (fstate !== this.state.fstate) {
       const ftransition = createFTransition(this.state.fstate, fstate);
 
-      return this.setState(reducer(this.state, addTransition(ftransition)));
+      return this.dispatch(addTransition(ftransition));
     }
+  };
+
+  handleStateDelete = (fstate: FState) => {
+    this.dispatch(deleteState(fstate));
   };
 
   renderFStates(fstates: FState[]): ReactNode {
@@ -167,13 +177,10 @@ export class Canvas extends Component<Props, State> {
               this.state.type === 'DRAGGING' && isDragged ? this.state.position : fstate.coords
             }
             svgEl={this.svgRef.current}
-            onTextChange={(text: string) =>
-              this.setState(reducer(this.state, editState({ ...fstate, text })))
-            }
+            onBorderClick={() => this.handleBorderClick(fstate)}
+            onTextChange={(text: string) => this.dispatch(editState({ ...fstate, text }))}
+            onDelete={this.handleStateDelete}
           />
-          {this.state.type !== 'DRAGGING' && (
-            <SVGBorder fstate={fstate} onClick={this.handleBorderClick} />
-          )}
         </g>
       );
     });

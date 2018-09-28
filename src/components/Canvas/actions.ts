@@ -8,6 +8,7 @@ export const enum ActionType {
   SET_LINE_STATE = 'SET_LINE_STATE',
   ADD_STATE = 'ADD_STATE',
   EDIT_STATE = 'EDIT_STATE',
+  DELETE_STATE = 'DELETE_STATE',
   ADD_TRANSITION = 'ADD_TRANSITION',
   EDIT_TRANSITION = 'EDIT_TRANSITION'
 }
@@ -44,6 +45,13 @@ export function editState(fstate: FState) {
   };
 }
 
+export function deleteState(fstate: FState) {
+  return {
+    type: ActionType.DELETE_STATE as ActionType.DELETE_STATE,
+    payload: fstate
+  };
+}
+
 export function addTransition(transition: FTransition) {
   return {
     type: ActionType.ADD_TRANSITION as ActionType.ADD_TRANSITION,
@@ -64,5 +72,6 @@ export type Action =
   | ReturnType<typeof setLineState>
   | ReturnType<typeof addState>
   | ReturnType<typeof editState>
+  | ReturnType<typeof deleteState>
   | ReturnType<typeof addTransition>
   | ReturnType<typeof editTransition>;

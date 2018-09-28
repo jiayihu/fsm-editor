@@ -1,15 +1,22 @@
 import './SVGState.css';
-import React, { Component, createElement, ReactNode, KeyboardEvent, ChangeEvent } from 'react';
+import React, {
+  Component,
+  createElement,
+  ReactNode,
+  KeyboardEvent,
+  ChangeEvent,
+  MouseEvent
+} from 'react';
 import { FState } from '../../domain/fstate';
 import { ElementType } from '../types';
+import { SVGBorder } from '../SVGBorder/SVGBorder';
+import Icon from '../Icon/Icon';
 
-type Props = {
-  coords: FState['coords'];
-  text: FState['text'];
-  style: FState['style'];
-
+type Props = FState & {
   svgEl: SVGSVGElement | null;
+  onBorderClick: (event: MouseEvent<SVGRectElement>) => void;
   onTextChange: (text: string) => void;
+  onDelete: (fstate: FState) => void;
 };
 
 type State =
@@ -38,6 +45,10 @@ export class SVGState extends Component<Props, State> {
 
   handleDblClick = () => {
     this.setState({ type: 'EDITING', text: this.props.text });
+  };
+
+  handleDelete = () => {
+    this.props.onDelete(this.props);
   };
 
   handleTextChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -88,6 +99,27 @@ export class SVGState extends Component<Props, State> {
           height={style.height}
           className="fstate__rect"
         />
+        <SVGBorder
+          coords={coords}
+          width={style.width}
+          height={style.height}
+          onClick={this.props.onBorderClick}
+        />
+        <circle
+          cx={coords.x + style.width}
+          cy={coords.y}
+          r="8"
+          className="fstate__delete"
+          onClick={this.handleDelete}
+        />
+        <Icon
+          name="delete"
+          width="12"
+          height="12"
+          x={coords.x + style.width - 6}
+          y={coords.y - 5}
+        />
+
         <foreignObject
           x={coords.x}
           y={coords.y + (style.height - style.fontSize) / 2}

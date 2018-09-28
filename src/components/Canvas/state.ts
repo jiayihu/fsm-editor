@@ -75,12 +75,10 @@ export const reducer = function reducer(state: State, action: Action): State | n
       // Update also in transitions involving the changed state
       const ftransitions = state.ftransitions.map(ftransition => {
         if (isSameFState(ftransition.fromState, fstate)) {
-          console.log('transition from');
           return { ...ftransition, fromState: fstate };
         }
 
         if (isSameFState(ftransition.toState, fstate)) {
-          console.log('transition to');
           return { ...ftransition, toState: fstate };
         }
 
@@ -88,6 +86,19 @@ export const reducer = function reducer(state: State, action: Action): State | n
       });
 
       return { type: 'READONLY', fstates, ftransitions };
+    }
+    case ActionType.DELETE_STATE: {
+      const fstate = action.payload;
+      const fstates = state.fstates.filter(x => !isSameFState(x, fstate));
+      const ftransitions = state.ftransitions.filter(
+        x => !isSameFState(x.fromState, fstate) && !isSameFState(x.toState, fstate)
+      );
+
+      return {
+        type: 'READONLY',
+        fstates,
+        ftransitions: ftransitions
+      };
     }
     case ActionType.ADD_TRANSITION: {
       const ftransition = action.payload;
