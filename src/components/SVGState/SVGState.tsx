@@ -1,22 +1,16 @@
 import './SVGState.css';
-import React, {
-  Component,
-  createElement,
-  ReactNode,
-  KeyboardEvent,
-  ChangeEvent,
-  MouseEvent
-} from 'react';
+import React, { Component, ReactNode, KeyboardEvent, ChangeEvent, MouseEvent } from 'react';
+import classnames from 'classnames';
 import { FState } from '../../domain/fstate';
 import { ElementType } from '../types';
 import { SVGBorder } from '../SVGBorder/SVGBorder';
-import Icon from '../Icon/Icon';
 
 type Props = FState & {
+  active: boolean;
   svgEl: SVGSVGElement | null;
   onBorderClick: (event: MouseEvent<SVGRectElement>) => void;
+  onContentClick: (event: MouseEvent<SVGRectElement>) => void;
   onTextChange: (text: string) => void;
-  onDelete: (fstate: FState) => void;
 };
 
 type State =
@@ -44,11 +38,9 @@ export class SVGState extends Component<Props, State> {
   };
 
   handleDblClick = () => {
-    this.setState({ type: 'EDITING', text: this.props.text });
-  };
+    if (!this.props.active) return;
 
-  handleDelete = () => {
-    this.props.onDelete(this.props);
+    this.setState({ type: 'EDITING', text: this.props.text });
   };
 
   handleTextChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -81,16 +73,13 @@ export class SVGState extends Component<Props, State> {
   }
 
   render() {
-    const { coords, text, style } = this.props;
-    // Use `createElement` because TS doesn't allow `xmlsn` on div
-    const textEl = createElement(
-      'div',
-      { className: 'fstate__text', xmlns: 'http://www.w3.org/1999/xhtml' },
-      this.renderText()
-    );
+    const { active, coords, style } = this.props;
+    const className = classnames('fstate', {
+      'is-active': active
+    });
 
     return (
-      <g className="fstate" onKeyDown={this.handleKeyDown}>
+      <g className={className} onKeyDown={this.handleKeyDown} onClick={this.props.onContentClick}>
         <rect
           x={coords.x}
           y={coords.y}
@@ -99,34 +88,23 @@ export class SVGState extends Component<Props, State> {
           height={style.height}
           className="fstate__rect"
         />
-        <SVGBorder
-          coords={coords}
-          width={style.width}
-          height={style.height}
-          onClick={this.props.onBorderClick}
-        />
-        <circle
-          cx={coords.x + style.width}
-          cy={coords.y}
-          r="8"
-          className="fstate__delete"
-          onClick={this.handleDelete}
-        />
-        <Icon
-          name="delete"
-          width="12"
-          height="12"
-          x={coords.x + style.width - 6}
-          y={coords.y - 5}
-        />
+        {active && (
+          <SVGBorder
+            coords={coords}
+            width={style.width}
+            height={style.height}
+            onClick={this.props.onBorderClick}
+          />
+        )}
 
         <foreignObject
           x={coords.x}
           y={coords.y + (style.height - style.fontSize) / 2}
           width="100"
           height={style.fontSize}
+          xmlns="http://www.w3.org/1999/xhtml"
         >
-          {textEl}
+          <div className="fstate__text">{this.renderText()}</div>
         </foreignObject>
       </g>
     );

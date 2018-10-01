@@ -5,15 +5,13 @@
 }
 
 .fstate__rect {
-  cursor: move;
   fill: rgb(var(--surface));
   rx: 6;
   ry: 6;
 }
 
-.fstate__delete {
-  cursor: pointer;
-  fill: rgb(var(--surface));
+.fstate.is-active .fstate__rect {
+  cursor: move;
 }
 
 .fstate__text {

@@ -12,6 +12,7 @@ type States =
       fstate: FState;
       position: Point;
     }
+  | { type: 'DELETING' }
   | {
       type: 'DRAWING_LINE';
       fstate: FState;
@@ -35,6 +36,13 @@ export const reducer = function reducer(state: State, action: Action): State | n
         type: 'DRAGGING',
         fstate,
         position,
+        fstates: state.fstates,
+        ftransitions: state.ftransitions
+      };
+    }
+    case ActionType.SET_DELETE_STATE: {
+      return {
+        type: 'DELETING',
         fstates: state.fstates,
         ftransitions: state.ftransitions
       };
@@ -121,6 +129,12 @@ export const reducer = function reducer(state: State, action: Action): State | n
 
         return x;
       });
+
+      return { type: 'READONLY', ftransitions, fstates: state.fstates };
+    }
+    case ActionType.DELETE_TRANSITION: {
+      const ftransition = action.payload;
+      const ftransitions = state.ftransitions.filter(x => !isSameFTransition(x, ftransition));
 
       return { type: 'READONLY', ftransitions, fstates: state.fstates };
     }

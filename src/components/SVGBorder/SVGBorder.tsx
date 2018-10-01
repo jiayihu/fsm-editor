@@ -2,7 +2,6 @@ import './SVGBorder.css';
 import React, { Component, MouseEvent } from 'react';
 import { ElementType } from '../types';
 import { Point } from '../../domain/geometry';
-import { noop } from '../../utils/generic';
 
 type Props = {
   isDisabled?: boolean;
@@ -20,12 +19,10 @@ export class SVGBorder extends Component<Props, State> {
     this.state = {};
   }
 
-  handleClick = (event: MouseEvent<SVGRectElement>) => {
-    this.props.isDisabled ? noop() : this.props.onClick(event);
-  };
-
   render() {
-    const { coords, width, height } = this.props;
+    const { isDisabled, coords, width, height } = this.props;
+
+    if (isDisabled) return null;
 
     return (
       <rect
@@ -35,7 +32,7 @@ export class SVGBorder extends Component<Props, State> {
         width={width}
         height={height}
         className="border"
-        onClick={this.handleClick}
+        onClick={this.props.onClick}
       />
     );
   }

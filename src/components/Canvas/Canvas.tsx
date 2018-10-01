@@ -1,12 +1,12 @@
 import './Canvas.css';
 import React, { Component, MouseEvent, createRef, RefObject, ReactNode } from 'react';
+import classnames from 'classnames';
 import { State, reducer } from './state';
 import { ElementType } from '../types';
 import { getSVGCoords } from '../../utils/svg';
 import { assertUnreachable } from '../../utils/typescript';
 import { FState, createFState, isSameFState } from '../../domain/fstate';
 import { SVGState } from '../SVGState/SVGState';
-import { SVGBorder } from '../SVGBorder/SVGBorder';
 import {
   addState,
   editState,
@@ -15,7 +15,9 @@ import {
   setLineState,
   addTransition,
   Action,
-  deleteState
+  deleteState,
+  setDeleteState,
+  deleteTransition
 } from './actions';
 import SVGTransition from '../SVGTransition/SVGTransition';
 import { createFTransition, FTransition } from '../../domain/transition';
@@ -81,6 +83,9 @@ export class Canvas extends Component<Props, State> {
 
   handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
+      case 'Backspace':
+        this.dispatch(setDeleteState());
+        return;
       case 'Escape':
         this.dispatch(resetState());
         return;
@@ -112,7 +117,9 @@ export class Canvas extends Component<Props, State> {
     }
   };
 
-  handleMouseDown = (event: MouseEvent, fstate: FState) => {
+  handleStateDragStart = (event: MouseEvent, fstate: FState) => {
+    if (this.state.type === 'DELETING') return;
+
     const elementType: ElementType | undefined = this.getElementType(event);
 
     if (elementType === ElementType.state) {
@@ -158,17 +165,26 @@ export class Canvas extends Component<Props, State> {
     }
   };
 
-  handleStateDelete = (fstate: FState) => {
-    this.dispatch(deleteState(fstate));
+  handleContentClick = (fstate: FState) => {
+    if (this.state.type === 'DELETING') {
+      return this.dispatch(deleteState(fstate));
+    }
+  };
+
+  handleTransitionClick = (ftransition: FTransition) => {
+    if (this.state.type === 'DELETING') {
+      return this.dispatch(deleteTransition(ftransition));
+    }
   };
 
   renderFStates(fstates: FState[]): ReactNode {
     return fstates.map(fstate => {
       const isDragged = this.state.type === 'DRAGGING' && isSameFState(fstate, this.state.fstate);
+      const isDeleting = this.state.type === 'DELETING';
 
       return (
         <g
-          onMouseDown={event => this.handleMouseDown(event, fstate)}
+          onMouseDown={event => this.handleStateDragStart(event, fstate)}
           key={`${fstate.coords.x} ${fstate.coords.y}`}
         >
           <SVGState
@@ -176,10 +192,11 @@ export class Canvas extends Component<Props, State> {
             coords={
               this.state.type === 'DRAGGING' && isDragged ? this.state.position : fstate.coords
             }
+            active={!isDragged && !isDeleting}
             svgEl={this.svgRef.current}
             onBorderClick={() => this.handleBorderClick(fstate)}
+            onContentClick={() => this.handleContentClick(fstate)}
             onTextChange={(text: string) => this.dispatch(editState({ ...fstate, text }))}
-            onDelete={this.handleStateDelete}
           />
         </g>
       );
@@ -210,7 +227,15 @@ export class Canvas extends Component<Props, State> {
         }
       }
 
-      return <SVGTransition type="READONLY" ftransition={ftransition} key={ftransition.id} />;
+      return (
+        <SVGTransition
+          type="READONLY"
+          active={this.state.type !== 'DELETING'}
+          ftransition={ftransition}
+          key={ftransition.id}
+          onClick={() => this.handleTransitionClick(ftransition)}
+        />
+      );
     });
   }
 
@@ -232,9 +257,13 @@ export class Canvas extends Component<Props, State> {
   }
 
   render() {
+    const className = classnames('canvas', {
+      [`is-${this.state.type.toLowerCase()}`]: true
+    });
+
     return (
       <svg
-        className="canvas"
+        className={className}
         ref={this.svgRef}
         width="100%"
         height="100%"

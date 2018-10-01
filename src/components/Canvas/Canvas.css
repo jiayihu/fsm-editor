@@ -2,6 +2,12 @@
   user-select: none; /* Disable text selection when dragging */
 }
 
+/* @TODO: think a better way without using children component classNames */
+.canvas.is-deleting .fstate,
+.canvas.is-deleting .ftransition {
+  cursor: pointer;
+}
+
 #marker-arrow path {
   fill: rgb(var(--primary-variant));
 }

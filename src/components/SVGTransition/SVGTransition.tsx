@@ -1,5 +1,5 @@
 import './SVGTransition.css';
-import React, { Component, ReactNode } from 'react';
+import React, { Component, ReactNode, MouseEvent } from 'react';
 import { FTransition } from '../../domain/transition';
 import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
 import { Point } from '../../domain/geometry';
@@ -8,7 +8,9 @@ type Props =
   | { type: 'DRAWING'; fromPosition: Point; toPosition: Point }
   | {
       type: 'READONLY';
+      active: boolean;
       ftransition: FTransition;
+      onClick: (event: MouseEvent<SVGLineElement>) => void;
     };
 
 export default class SVGTransition extends Component<Props> {
@@ -42,6 +44,7 @@ export default class SVGTransition extends Component<Props> {
         y1={fromPosition.y}
         x2={toPosition.x}
         y2={toPosition.y}
+        onClick={this.props.onClick}
       />
     );
   }

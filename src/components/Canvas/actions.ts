@@ -5,12 +5,14 @@ import { Point } from '../../domain/geometry';
 export const enum ActionType {
   RESET_STATE = 'RESET_STATE',
   SET_DRAG_STATE = 'SET_DRAG_STATE',
+  SET_DELETE_STATE = 'SET_DELETE_STATE',
   SET_LINE_STATE = 'SET_LINE_STATE',
   ADD_STATE = 'ADD_STATE',
   EDIT_STATE = 'EDIT_STATE',
   DELETE_STATE = 'DELETE_STATE',
   ADD_TRANSITION = 'ADD_TRANSITION',
-  EDIT_TRANSITION = 'EDIT_TRANSITION'
+  EDIT_TRANSITION = 'EDIT_TRANSITION',
+  DELETE_TRANSITION = 'DELETE_TRANSITION'
 }
 
 export function resetState() {
@@ -21,6 +23,12 @@ export function setDragState(fstate: FState, position: Point) {
   return {
     type: ActionType.SET_DRAG_STATE as ActionType.SET_DRAG_STATE,
     payload: { fstate, position }
+  };
+}
+
+export function setDeleteState() {
+  return {
+    type: ActionType.SET_DELETE_STATE as ActionType.SET_DELETE_STATE
   };
 }
 
@@ -66,12 +74,21 @@ export function editTransition(ftransition: FTransition) {
   };
 }
 
+export function deleteTransition(ftranstion: FTransition) {
+  return {
+    type: ActionType.DELETE_TRANSITION as ActionType.DELETE_TRANSITION,
+    payload: ftranstion
+  };
+}
+
 export type Action =
   | ReturnType<typeof resetState>
   | ReturnType<typeof setDragState>
+  | ReturnType<typeof setDeleteState>
   | ReturnType<typeof setLineState>
   | ReturnType<typeof addState>
   | ReturnType<typeof editState>
   | ReturnType<typeof deleteState>
   | ReturnType<typeof addTransition>
-  | ReturnType<typeof editTransition>;
+  | ReturnType<typeof editTransition>
+  | ReturnType<typeof deleteTransition>;
