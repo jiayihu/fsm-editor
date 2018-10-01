@@ -5,7 +5,13 @@ import { State, reducer } from './state';
 import { ElementType } from '../types';
 import { getSVGCoords } from '../../utils/svg';
 import { assertUnreachable } from '../../utils/typescript';
-import { FState, createFState, isSameFState } from '../../domain/fstate';
+import {
+  FState,
+  createFState,
+  isSameFState,
+  getTextWidth,
+  getTextHeight
+} from '../../domain/fstate';
 import { SVGState } from '../SVGState/SVGState';
 import {
   addState,
@@ -171,6 +177,19 @@ export class Canvas extends Component<Props, State> {
     }
   };
 
+  handleFStateTextChange = (fstate: FState, text: string) => {
+    const width = getTextWidth(text);
+    const height = getTextHeight(text);
+
+    const style: FState['style'] = {
+      ...fstate.style,
+      width,
+      height
+    };
+
+    this.dispatch(editState({ ...fstate, style, text }));
+  };
+
   handleTransitionClick = (ftransition: FTransition) => {
     if (this.state.type === 'DELETING') {
       return this.dispatch(deleteTransition(ftransition));
@@ -196,7 +215,7 @@ export class Canvas extends Component<Props, State> {
             svgEl={this.svgRef.current}
             onBorderClick={() => this.handleBorderClick(fstate)}
             onContentClick={() => this.handleContentClick(fstate)}
-            onTextChange={(text: string) => this.dispatch(editState({ ...fstate, text }))}
+            onTextChange={text => this.handleFStateTextChange(fstate, text)}
           />
         </g>
       );

@@ -16,7 +16,8 @@
 
 .fstate__text {
   height: 100%;
-  text-align: center;
+  line-height: 1;
+  white-space: pre-wrap;
 }
 
 .fstate__input {
@@ -26,13 +27,8 @@
   box-shadow: none;
   color: inherit;
   height: 100%;
-  max-width: 100%;
-  padding-bottom: calc(0.375em - 1px);
-  padding-left: calc(0.625em - 1px);
-  padding-right: calc(0.625em - 1px);
-  padding-top: calc(0.375em - 1px);
+  padding: 1rem;
   position: relative;
-  text-align: center;
   vertical-align: top;
   width: 100%;
 }
