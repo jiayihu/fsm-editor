@@ -3,7 +3,7 @@ import React, { Component, MouseEvent, createRef, RefObject, ReactNode } from 'r
 import classnames from 'classnames';
 import { State, reducer } from './state';
 import { ElementType } from '../types';
-import { getSVGCoords } from '../../utils/svg';
+import { getSVGCoords, exportAsPNG, exportAsSVG } from '../../utils/svg';
 import { assertUnreachable } from '../../utils/typescript';
 import {
   FState,
@@ -196,6 +196,14 @@ export class Canvas extends Component<Props, State> {
     }
   };
 
+  handleExportAsSVG = () => {
+    if (this.svgRef.current) exportAsSVG(this.svgRef.current);
+  };
+
+  handleExportAsPNG = () => {
+    if (this.svgRef.current) exportAsPNG(this.svgRef.current);
+  };
+
   renderFStates(fstates: FState[]): ReactNode {
     return fstates.map(fstate => {
       const isDragged = this.state.type === 'DRAGGING' && isSameFState(fstate, this.state.fstate);
@@ -281,53 +289,63 @@ export class Canvas extends Component<Props, State> {
     });
 
     return (
-      <svg
-        className={className}
-        ref={this.svgRef}
-        width="100%"
-        height="100%"
-        xmlns="http://www.w3.org/2000/svg"
-        xmlnsXlink="http://www.w3.org/1999/xlink"
-        onClick={this.handleClick}
-        onDoubleClick={this.handleDblClick}
-        onMouseMove={this.handleMouseMove}
-        onMouseUp={this.handleMouseUp}
-        onMouseLeave={this.handleMouseLeave}
-      >
-        <defs>
-          <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
-            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" strokeWidth="0.5" />
-          </pattern>
-          <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
-            <rect width="100" height="100" fill="url(#smallGrid)" />
-            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="gray" strokeWidth="1" />
-          </pattern>
-
-          <marker
-            id="marker-arrow"
-            viewBox="0 0 10 10"
-            refX="10"
-            refY="5"
-            markerWidth="6"
-            markerHeight="6"
-            orient="auto"
-          >
-            <path d="M 0 0 L 10 5 L 0 10 z" />
-          </marker>
-        </defs>
-
-        <rect
-          data-element={ElementType.grid}
-          className="grid"
+      <>
+        <div className="toolbar">
+          <button className="toolbar__btn" onClick={this.handleExportAsSVG}>
+            Export as SVG
+          </button>
+          <button className="toolbar__btn" onClick={this.handleExportAsPNG}>
+            Export as PNG
+          </button>
+        </div>
+        <svg
+          className={className}
+          ref={this.svgRef}
           width="100%"
           height="100%"
-          fill="url(#grid)"
-        />
+          xmlns="http://www.w3.org/2000/svg"
+          xmlnsXlink="http://www.w3.org/1999/xlink"
+          onClick={this.handleClick}
+          onDoubleClick={this.handleDblClick}
+          onMouseMove={this.handleMouseMove}
+          onMouseUp={this.handleMouseUp}
+          onMouseLeave={this.handleMouseLeave}
+        >
+          <defs>
+            <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" strokeWidth="0.5" />
+            </pattern>
+            <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+              <rect width="100" height="100" fill="url(#smallGrid)" />
+              <path d="M 100 0 L 0 0 0 100" fill="none" stroke="gray" strokeWidth="1" />
+            </pattern>
 
-        {this.renderFStates(this.state.fstates)}
-        {this.renderFTransitions(this.state.ftransitions)}
-        {this.renderDrawingLine()}
-      </svg>
+            <marker
+              id="marker-arrow"
+              viewBox="0 0 10 10"
+              refX="10"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto"
+            >
+              <path d="M 0 0 L 10 5 L 0 10 z" />
+            </marker>
+          </defs>
+
+          <rect
+            data-element={ElementType.grid}
+            className="grid js-not-exported"
+            width="100%"
+            height="100%"
+            fill="url(#grid)"
+          />
+
+          {this.renderFStates(this.state.fstates)}
+          {this.renderFTransitions(this.state.ftransitions)}
+          {this.renderDrawingLine()}
+        </svg>
+      </>
     );
   }
 }

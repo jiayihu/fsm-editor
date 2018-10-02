@@ -1,15 +1,7 @@
 import './SVGState.css';
-import React, {
-  Component,
-  ReactNode,
-  KeyboardEvent,
-  ChangeEvent,
-  MouseEvent,
-  SyntheticEvent
-} from 'react';
+import React, { Component, ReactNode, KeyboardEvent, ChangeEvent, MouseEvent } from 'react';
 import classnames from 'classnames';
-import TextareaAutosize from 'react-autosize-textarea';
-import { FState } from '../../domain/fstate';
+import { FState, getTextWidth, getTextHeight } from '../../domain/fstate';
 import { ElementType } from '../types';
 import { SVGBorder } from '../SVGBorder/SVGBorder';
 
@@ -65,7 +57,7 @@ export class SVGState extends Component<Props, State> {
         return <span onDoubleClick={this.handleDblClick}>{this.props.text}</span>;
       case 'EDITING':
         return (
-          <TextareaAutosize
+          <textarea
             autoFocus
             className="fstate__input"
             value={this.state.text}
@@ -107,11 +99,20 @@ export class SVGState extends Component<Props, State> {
         <foreignObject
           x={coords.x + padding}
           y={coords.y + padding}
-          width={style.width - padding * 2}
-          height={style.height - padding * 2}
-          xmlns="http://www.w3.org/1999/xhtml"
+          width={
+            this.state.type === 'EDITING'
+              ? getTextWidth(this.state.text)
+              : style.width - padding * 2
+          }
+          height={
+            this.state.type === 'EDITING'
+              ? getTextHeight(this.state.text)
+              : style.height - padding * 2
+          }
         >
-          <div className="fstate__text">{this.renderText()}</div>
+          <div {...{ xmlns: 'http://www.w3.org/1999/xhtml' }} className="fstate__text">
+            {this.renderText()}
+          </div>
         </foreignObject>
       </g>
     );
