@@ -14,6 +14,22 @@ type Props =
     };
 
 export default class SVGTransition extends Component<Props> {
+  static getDefs() {
+    return (
+      <marker
+        id="marker-arrow"
+        viewBox="0 0 10 10"
+        refX="10"
+        refY="5"
+        markerWidth="6"
+        markerHeight="6"
+        orient="auto"
+      >
+        <path d="M 0 0 L 10 5 L 0 10 z" />
+      </marker>
+    );
+  }
+
   renderTransition(): ReactNode {
     if (this.props.type !== 'READONLY') return null;
 

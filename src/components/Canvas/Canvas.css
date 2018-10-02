@@ -33,6 +33,8 @@
   margin-right: var(--spacing-medium);
 }
 
-#marker-arrow path {
+#initial-arrow {
   fill: rgb(var(--primary-variant));
+  stroke: rgb(var(--primary-variant));
+  stroke-width: 2px;
 }

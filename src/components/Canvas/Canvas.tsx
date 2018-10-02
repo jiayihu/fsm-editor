@@ -29,12 +29,21 @@ import SVGTransition from '../SVGTransition/SVGTransition';
 import { createFTransition, FTransition } from '../../domain/transition';
 import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
 import { Point } from '../../domain/geometry';
+import SVGGrid from '../SVGGrid/SVGGrid';
 
 type Props = {};
 
 type CanvasElement = SVGElement & { dataset: { element: ElementType | undefined } };
 
 export class Canvas extends Component<Props, State> {
+  static getDefs() {
+    return (
+      <g id="initial-arrow">
+        <path d="M 0 0 l 30 0 m 0 -4 l 15 4 l -15 4 l 0 -8" />
+      </g>
+    );
+  }
+
   svgRef: RefObject<SVGSVGElement>;
 
   constructor(props: Props) {
@@ -204,21 +213,29 @@ export class Canvas extends Component<Props, State> {
     if (this.svgRef.current) exportAsPNG(this.svgRef.current);
   };
 
+  renderInitialArrow({ coords, style }: FState) {
+    const arrowWidth = 45; // see the <path>
+
+    return (
+      <use xlinkHref="#initial-arrow" x={coords.x - arrowWidth} y={coords.y + style.height / 2} />
+    );
+  }
+
   renderFStates(fstates: FState[]): ReactNode {
-    return fstates.map(fstate => {
+    return fstates.map((fstate, index) => {
+      const coords = fstate.coords;
       const isDragged = this.state.type === 'DRAGGING' && isSameFState(fstate, this.state.fstate);
       const isDeleting = this.state.type === 'DELETING';
 
       return (
         <g
           onMouseDown={event => this.handleStateDragStart(event, fstate)}
-          key={`${fstate.coords.x} ${fstate.coords.y}`}
+          key={`${coords.x} ${coords.y}`}
         >
+          {index === 0 ? this.renderInitialArrow(fstate) : null}
           <SVGState
             {...fstate}
-            coords={
-              this.state.type === 'DRAGGING' && isDragged ? this.state.position : fstate.coords
-            }
+            coords={this.state.type === 'DRAGGING' && isDragged ? this.state.position : coords}
             active={!isDragged && !isDeleting}
             svgEl={this.svgRef.current}
             onBorderClick={() => this.handleBorderClick(fstate)}
@@ -312,34 +329,12 @@ export class Canvas extends Component<Props, State> {
           onMouseLeave={this.handleMouseLeave}
         >
           <defs>
-            <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
-              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" strokeWidth="0.5" />
-            </pattern>
-            <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
-              <rect width="100" height="100" fill="url(#smallGrid)" />
-              <path d="M 100 0 L 0 0 0 100" fill="none" stroke="gray" strokeWidth="1" />
-            </pattern>
-
-            <marker
-              id="marker-arrow"
-              viewBox="0 0 10 10"
-              refX="10"
-              refY="5"
-              markerWidth="6"
-              markerHeight="6"
-              orient="auto"
-            >
-              <path d="M 0 0 L 10 5 L 0 10 z" />
-            </marker>
+            {SVGGrid.getDefs()}
+            {Canvas.getDefs()}
+            {SVGTransition.getDefs()}
           </defs>
 
-          <rect
-            data-element={ElementType.grid}
-            className="grid js-not-exported"
-            width="100%"
-            height="100%"
-            fill="url(#grid)"
-          />
+          <SVGGrid />
 
           {this.renderFStates(this.state.fstates)}
           {this.renderFTransitions(this.state.ftransitions)}
