@@ -13,7 +13,7 @@ type Props =
       onClick: (event: MouseEvent<SVGLineElement>) => void;
     };
 
-export default class SVGTransition extends Component<Props> {
+export class SVGTransition extends Component<Props> {
   static getDefs() {
     return (
       <marker

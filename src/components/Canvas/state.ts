@@ -7,6 +7,7 @@ import { Point } from '../../domain/geometry';
 
 type States =
   | { type: 'READONLY' }
+  | { type: 'EDITING' }
   | {
       type: 'DRAGGING';
       fstate: FState;
@@ -36,6 +37,13 @@ export const reducer = function reducer(state: State, action: Action): State | n
         type: 'DRAGGING',
         fstate,
         position,
+        fstates: state.fstates,
+        ftransitions: state.ftransitions
+      };
+    }
+    case ActionType.SET_EDITING_STATE: {
+      return {
+        type: 'EDITING',
         fstates: state.fstates,
         ftransitions: state.ftransitions
       };

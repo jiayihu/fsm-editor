@@ -5,6 +5,7 @@ import { Point } from '../../domain/geometry';
 export const enum ActionType {
   RESET_STATE = 'RESET_STATE',
   SET_DRAG_STATE = 'SET_DRAG_STATE',
+  SET_EDITING_STATE = 'SET_EDITING_STATE',
   SET_DELETE_STATE = 'SET_DELETE_STATE',
   SET_LINE_STATE = 'SET_LINE_STATE',
   ADD_STATE = 'ADD_STATE',
@@ -23,6 +24,12 @@ export function setDragState(fstate: FState, position: Point) {
   return {
     type: ActionType.SET_DRAG_STATE as ActionType.SET_DRAG_STATE,
     payload: { fstate, position }
+  };
+}
+
+export function setEditingState() {
+  return {
+    type: ActionType.SET_EDITING_STATE as ActionType.SET_EDITING_STATE
   };
 }
 
@@ -84,6 +91,7 @@ export function deleteTransition(ftranstion: FTransition) {
 export type Action =
   | ReturnType<typeof resetState>
   | ReturnType<typeof setDragState>
+  | ReturnType<typeof setEditingState>
   | ReturnType<typeof setDeleteState>
   | ReturnType<typeof setLineState>
   | ReturnType<typeof addState>

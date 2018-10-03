@@ -3,7 +3,7 @@ import { ElementType } from '../types';
 
 type Props = {};
 
-export default class extends Component<Props> {
+export class SVGGrid extends Component<Props> {
   static getDefs() {
     return (
       <>

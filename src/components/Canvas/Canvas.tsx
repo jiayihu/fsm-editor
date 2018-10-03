@@ -5,13 +5,7 @@ import { State, reducer } from './state';
 import { ElementType } from '../types';
 import { getSVGCoords, exportAsPNG, exportAsSVG } from '../../utils/svg';
 import { assertUnreachable } from '../../utils/typescript';
-import {
-  FState,
-  createFState,
-  isSameFState,
-  getTextWidth,
-  getTextHeight
-} from '../../domain/fstate';
+import { FState, createFState, isSameFState } from '../../domain/fstate';
 import { SVGState } from '../SVGState/SVGState';
 import {
   addState,
@@ -23,13 +17,14 @@ import {
   Action,
   deleteState,
   setDeleteState,
-  deleteTransition
+  deleteTransition,
+  setEditingState
 } from './actions';
-import SVGTransition from '../SVGTransition/SVGTransition';
+import { SVGTransition } from '../SVGTransition/SVGTransition';
 import { createFTransition, FTransition } from '../../domain/transition';
 import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
 import { Point } from '../../domain/geometry';
-import SVGGrid from '../SVGGrid/SVGGrid';
+import { SVGGrid } from '../SVGGrid/SVGGrid';
 
 type Props = {};
 
@@ -99,7 +94,7 @@ export class Canvas extends Component<Props, State> {
   handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
       case 'Backspace':
-        this.dispatch(setDeleteState());
+        if (this.state.type !== 'EDITING') this.dispatch(setDeleteState());
         return;
       case 'Escape':
         this.dispatch(resetState());
@@ -164,7 +159,7 @@ export class Canvas extends Component<Props, State> {
   };
 
   handleMouseLeave = () => {
-    this.dispatch(resetState());
+    // this.dispatch(resetState());
   };
 
   handleBorderClick = (fstate: FState) => {
@@ -186,10 +181,9 @@ export class Canvas extends Component<Props, State> {
     }
   };
 
-  handleFStateTextChange = (fstate: FState, text: string) => {
-    const width = getTextWidth(text);
-    const height = getTextHeight(text);
+  handleFStateEditStart = () => this.dispatch(setEditingState());
 
+  handleFStateEditEnd = (fstate: FState, text: string, width: number, height: number) => {
     const style: FState['style'] = {
       ...fstate.style,
       width,
@@ -240,7 +234,10 @@ export class Canvas extends Component<Props, State> {
             svgEl={this.svgRef.current}
             onBorderClick={() => this.handleBorderClick(fstate)}
             onContentClick={() => this.handleContentClick(fstate)}
-            onTextChange={text => this.handleFStateTextChange(fstate, text)}
+            onEditStart={this.handleFStateEditStart}
+            onEditEnd={(text, width, height) =>
+              this.handleFStateEditEnd(fstate, text, width, height)
+            }
           />
         </g>
       );
