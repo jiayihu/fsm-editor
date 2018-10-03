@@ -25,7 +25,7 @@ function prepareSVG(svg: SVGSVGElement): SVGSVGElement {
 }
 
 function inlineSVGStyles(clone: SVGElement, source: SVGElement) {
-  const containerElements = ['svg', 'g'];
+  const containerElements = ['svg', 'defs', 'pattern', 'marker', 'g'];
   const relevantStyles: { [tagName: string]: string[] } = {
     rect: ['fill', 'stroke', 'stroke-width', 'rx', 'ry'],
     path: ['fill', 'stroke', 'stroke-width'],
