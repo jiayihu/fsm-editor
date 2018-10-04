@@ -17,7 +17,8 @@ import {
   deleteState,
   setDeleteState,
   deleteTransition,
-  setEditingState
+  setEditingState,
+  editTransition
 } from './actions';
 import { SVGTransition } from '../SVGTransition/SVGTransition';
 import { createFTransition, FTransition } from '../../domain/transition';
@@ -182,7 +183,7 @@ export const Canvas = Radium(
       }
     };
 
-    handleFStateEditStart = () => this.dispatch(setEditingState());
+    handleEditStart = () => this.dispatch(setEditingState());
 
     handleFStateEditEnd = (fstate: FState, text: string, width: number, height: number) => {
       const style: FState['style'] = {
@@ -192,6 +193,10 @@ export const Canvas = Radium(
       };
 
       this.dispatch(editState({ ...fstate, style, text }));
+    };
+
+    handleFTransitionEditEnd = (ftransition: FTransition, text: string) => {
+      this.dispatch(editTransition({ ...ftransition, text }));
     };
 
     handleTransitionClick = (ftransition: FTransition) => {
@@ -238,7 +243,7 @@ export const Canvas = Radium(
               svgEl={this.svgRef.current}
               onBorderClick={() => this.handleBorderClick(fstate)}
               onContentClick={() => this.handleContentClick(fstate)}
-              onEditStart={this.handleFStateEditStart}
+              onEditStart={this.handleEditStart}
               onEditEnd={(text, width, height) =>
                 this.handleFStateEditEnd(fstate, text, width, height)
               }
@@ -282,6 +287,8 @@ export const Canvas = Radium(
             ftransition={ftransition}
             key={ftransition.id}
             onClick={() => this.handleTransitionClick(ftransition)}
+            onEditStart={this.handleEditStart}
+            onEditEnd={text => this.handleFTransitionEditEnd(ftransition, text)}
             style={isDeleting ? styles.isDeletingChild : undefined}
           />
         );

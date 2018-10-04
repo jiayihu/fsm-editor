@@ -1,4 +1,4 @@
-import React, { Component, ReactNode, MouseEvent, CSSProperties } from 'react';
+import React, { Component, ReactNode, MouseEvent, CSSProperties, ChangeEvent } from 'react';
 import Radium from 'radium';
 import { FTransition } from '../../domain/transition';
 import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
@@ -13,6 +13,8 @@ type Props =
       ftransition: FTransition;
       style?: CSSProperties;
       onClick: (event: MouseEvent<SVGLineElement>) => void;
+      onEditStart: () => void;
+      onEditEnd: (text: string) => void;
     };
 
 type State =
@@ -47,16 +49,63 @@ export const SVGTransition = Radium(
       };
     }
 
-    renderText(fromPosition: Point, toPosition: Point): ReactNode {
+    handleDblClick = () => {
+      if (this.props.type !== 'READONLY') return;
+
+      const {
+        ftransition: { text }
+      } = this.props;
+
+      this.props.onEditStart();
+      this.setState({ type: 'EDITING', text });
+    };
+
+    handleTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+      this.setState({ type: 'EDITING', text: event.target.value });
+    };
+
+    handleTextBlur = () => {
+      if (this.props.type !== 'READONLY' || this.state.type !== 'EDITING') return;
+
+      this.setState({ type: 'READONLY' });
+      this.props.onEditEnd(this.state.text);
+    };
+
+    renderText(): ReactNode {
+      if (this.props.type !== 'READONLY') return null;
+
+      switch (this.state.type) {
+        case 'READONLY':
+          return (
+            <span onDoubleClick={this.handleDblClick} style={styles.readonlyText}>
+              {this.props.ftransition.text}
+            </span>
+          );
+        case 'EDITING':
+          return (
+            <textarea
+              autoFocus
+              value={this.state.text}
+              onChange={this.handleTextChange}
+              onBlur={this.handleTextBlur}
+              style={styles.input}
+            />
+          );
+      }
+    }
+
+    renderForeignObject(fromPosition: Point, toPosition: Point): ReactNode {
       if (this.props.type !== 'READONLY') return null;
 
       const width = Math.abs(toPosition.x - fromPosition.x);
       const height = Math.abs(toPosition.y - fromPosition.y);
+      const x = Math.min(fromPosition.x, toPosition.x);
+      const y = Math.min(fromPosition.y, toPosition.y);
 
       return (
-        <foreignObject x={fromPosition.x} y={fromPosition.y} width={width} height={height}>
+        <foreignObject x={x} y={y} width={width} height={height}>
           <div {...{ xmlns: 'http://www.w3.org/1999/xhtml' }} style={styles.text}>
-            {this.props.ftransition.text}
+            {this.renderText()}
           </div>
         </foreignObject>
       );
@@ -95,7 +144,7 @@ export const SVGTransition = Radium(
             onClick={this.props.onClick}
             style={asCSS([styles.ftransition, this.props.style])}
           />
-          {this.renderText(fromPosition, toPosition)}
+          {this.renderForeignObject(fromPosition, toPosition)}
         </g>
       );
     }
@@ -122,7 +171,9 @@ export const SVGTransition = Radium(
   }
 );
 
-const styles: RadiumStyle<'ftransition' | 'text' | 'markerArrow' | 'isDrawingFtransition'> = {
+const styles: RadiumStyle<
+  'ftransition' | 'text' | 'readonlyText' | 'input' | 'markerArrow' | 'isDrawingFtransition'
+> = {
   ftransition: {
     markerEnd: 'url(#marker-arrow)',
     stroke: 'rgb(var(--secondary))',
@@ -131,7 +182,26 @@ const styles: RadiumStyle<'ftransition' | 'text' | 'markerArrow' | 'isDrawingFtr
   text: {
     height: '100%',
     lineHeight: '1',
-    whiteSpace: 'pre-wrap'
+    whiteSpace: 'pre-wrap',
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'center'
+  },
+  readonlyText: {
+    backgroundColor: 'rgb(var(--surface))'
+  },
+  /** @TODO: share input styles */
+  input: {
+    appearance: 'none',
+    backgroundColor: '#fff',
+    border: 'none',
+    boxShadow: 'none',
+    color: 'inherit',
+    lineHeight: '1',
+    padding: '1rem',
+    position: 'relative',
+    textAlign: 'center',
+    verticalAlign: 'top'
   },
   markerArrow: {
     fill: 'rgb(var(--secondary-variant))'

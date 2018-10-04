@@ -7,7 +7,7 @@ import { Point } from '../../domain/geometry';
 
 type States =
   | { type: 'READONLY' }
-  | { type: 'EDITING' }
+  | { type: 'EDITING' } // It's editing the fstate or the ftransition
   | {
       type: 'DRAGGING';
       fstate: FState;

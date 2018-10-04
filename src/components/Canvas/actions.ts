@@ -67,10 +67,10 @@ export function deleteState(fstate: FState) {
   };
 }
 
-export function addTransition(transition: FTransition) {
+export function addTransition(ftransition: FTransition) {
   return {
     type: ActionType.ADD_TRANSITION as ActionType.ADD_TRANSITION,
-    payload: transition
+    payload: ftransition
   };
 }
 

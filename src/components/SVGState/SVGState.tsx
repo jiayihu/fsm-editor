@@ -100,22 +100,21 @@ export const SVGState = Radium(
     };
 
     renderText(): ReactNode {
-      const {
-        fstate: { text }
-      } = this.props;
-
       switch (this.state.type) {
         case 'READONLY':
-          return <span onDoubleClick={this.handleDblClick}>{text}</span>;
+          return <span onDoubleClick={this.handleDblClick}>{this.props.fstate.text}</span>;
         case 'EDITING':
           return (
-            <textarea
-              autoFocus
-              value={this.state.text}
-              onChange={this.handleTextChange}
-              onBlur={this.handleTextBlur}
-              style={styles.input}
-            />
+            <>
+              <textarea
+                autoFocus
+                value={this.state.text}
+                onChange={this.handleTextChange}
+                onBlur={this.handleTextBlur}
+                style={styles.input}
+              />
+              <TextRuler text={this.state.text} onCalculate={this.handleCalculateSize} />
+            </>
           );
       }
     }
@@ -170,9 +169,6 @@ export const SVGState = Radium(
           >
             <div {...{ xmlns: 'http://www.w3.org/1999/xhtml' }} style={styles.text}>
               {this.renderText()}
-              {this.state.type === 'EDITING' ? (
-                <TextRuler text={this.state.text} onCalculate={this.handleCalculateSize} />
-              ) : null}
             </div>
           </foreignObject>
         </g>

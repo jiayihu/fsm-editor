@@ -17,7 +17,7 @@ export function createFTransition(fromState: FState, toState: FState): FTransiti
     id: generatedId('ftransition'),
     fromState,
     toState,
-    text: 'Hello',
+    text: 'Action',
     style: {}
   };
 }
