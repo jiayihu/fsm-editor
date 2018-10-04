@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/classnames": "^2.2.6",
     "@types/node": "^10.5.1",
+    "@types/radium": "^0.24.2",
     "@types/react": "^16.4.14",
     "@types/react-dom": "^16.0.7",
     "@types/webpack": "^4.4.11",
@@ -51,6 +52,7 @@
   },
   "dependencies": {
     "classnames": "^2.2.6",
+    "radium": "^0.25.0",
     "react": "^16.5.2",
     "react-dom": "^16.5.2"
   }
