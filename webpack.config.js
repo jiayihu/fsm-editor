@@ -64,10 +64,6 @@ module.exports = {
   performance: { hints: false },
   module: {
     rules: [
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader', 'postcss-loader']
-      },
       { test: /\.tsx?$/, loader: 'ts-loader' },
       {
         test: /\.html$/,
