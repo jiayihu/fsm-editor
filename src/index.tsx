@@ -1,9 +1,13 @@
-import './css/partials/normalize.css';
-import './css/partials/generic.css';
-import './css/variables.css';
-
 import React from 'react';
 import { render } from 'react-dom';
+import Radium from 'radium';
 import { App } from './layout/App/App';
+import { globalStyle } from './css/GlobalStyle';
 
-render(<App />, document.getElementById('root'));
+render(
+  <Radium.StyleRoot>
+    {globalStyle}
+    <App />
+  </Radium.StyleRoot>,
+  document.getElementById('root')
+);

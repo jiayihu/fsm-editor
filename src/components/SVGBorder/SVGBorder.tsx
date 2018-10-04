@@ -2,6 +2,7 @@ import React, { Component, MouseEvent } from 'react';
 import Radium from 'radium';
 import { ElementType } from '../types';
 import { Point } from '../../domain/geometry';
+import { theme } from '../../css/theme';
 
 type Props = {
   isDisabled?: boolean;
@@ -48,10 +49,10 @@ const styles: RadiumStyle<'border'> = {
     pointerEvents: 'stroke',
     stroke: ' transparent',
     strokeWidth: ' 4px',
-    transition: ' all var(--animation-duration-simple) var(--easing-standard)',
+    transition: `all ${theme.animation.duration.simple} ${theme.animation.easing.standard}`,
 
     ':hover': {
-      stroke: 'rgb(var(--secondary))'
+      stroke: theme.colors.secondary
     }
   }
 };

@@ -4,6 +4,7 @@ import { FTransition } from '../../domain/transition';
 import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
 import { Point } from '../../domain/geometry';
 import { asCSS } from '../../utils/radium';
+import { theme } from '../../css/theme';
 
 type Props =
   | { type: 'DRAWING'; fromPosition: Point; toPosition: Point; style?: CSSProperties }
@@ -176,7 +177,7 @@ const styles: RadiumStyle<
 > = {
   ftransition: {
     markerEnd: 'url(#marker-arrow)',
-    stroke: 'rgb(var(--secondary))',
+    stroke: theme.colors.secondary,
     strokeWidth: '2px'
   },
   text: {
@@ -188,7 +189,7 @@ const styles: RadiumStyle<
     justifyContent: 'center'
   },
   readonlyText: {
-    backgroundColor: 'rgb(var(--surface))'
+    backgroundColor: theme.colors.surface
   },
   /** @TODO: share input styles */
   input: {
@@ -204,7 +205,7 @@ const styles: RadiumStyle<
     verticalAlign: 'top'
   },
   markerArrow: {
-    fill: 'rgb(var(--secondary-variant))'
+    fill: theme.colors.secondaryVariant
   },
 
   isDrawingFtransition: {

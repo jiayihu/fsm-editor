@@ -36,7 +36,7 @@ type State =
 
 export const SVGState = Radium(
   class SVGState extends Component<Props, State> {
-    padding = theme.fontSize;
+    padding = theme.spacing.medium;
 
     constructor(props: Props) {
       super(props);
@@ -180,11 +180,11 @@ export const SVGState = Radium(
 const styles: RadiumStyle<'fstate' | 'rect' | 'text' | 'input' | 'isActiveRect'> = {
   fstate: {
     fill: 'none',
-    stroke: 'rgb(var(--primary-variant))',
+    stroke: theme.colors.primaryVariant,
     strokeWidth: '2px'
   },
   rect: {
-    fill: 'rgb(var(--surface))'
+    fill: theme.colors.surface
   },
   text: {
     height: '100%',

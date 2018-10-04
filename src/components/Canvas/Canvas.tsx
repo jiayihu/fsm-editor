@@ -26,6 +26,7 @@ import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPe
 import { Point } from '../../domain/geometry';
 import { SVGGrid } from '../SVGGrid/SVGGrid';
 import { asCSS } from '../../utils/radium';
+import { theme } from '../../css/theme';
 
 type Props = {};
 
@@ -318,7 +319,7 @@ export const Canvas = Radium(
           <div style={styles.toolbar}>
             <button
               onClick={this.handleExportAsSVG}
-              style={asCSS([styles.toolbarBtn, { marginRight: 'var(--spacing-medium)' }])}
+              style={asCSS([styles.toolbarBtn, { marginRight: theme.spacing.medium }])}
               key="radium-btn-1"
             >
               Export as SVG
@@ -368,8 +369,8 @@ const styles: RadiumStyle<
     userSelect: 'none' /* Disables text selection when dragging */
   },
   toolbar: {
-    backgroundColor: 'rgb(var(--primary))',
-    paddingBottom: 'var(--spacing-medium)',
+    backgroundColor: theme.colors.primary,
+    paddingBottom: theme.spacing.medium,
     textAlign: 'center'
   },
   toolbarBtn: {
@@ -392,8 +393,8 @@ const styles: RadiumStyle<
     }
   },
   initialArrow: {
-    fill: 'rgb(var(--primary-variant))',
-    stroke: 'rgb(var(--primary-variant))',
+    fill: theme.colors.primaryVariant,
+    stroke: theme.colors.primaryVariant,
     strokeWidth: '2px'
   },
 
