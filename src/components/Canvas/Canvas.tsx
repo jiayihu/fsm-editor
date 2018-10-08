@@ -332,13 +332,13 @@ export const Canvas = Radium(
           <CanvasResizer
             type={this.state.type === 'DRAGGING' ? 'DRAGGING' : 'READONLY'}
             position={this.state.type === 'DRAGGING' ? this.state.position : null}
-            render={(width, height) => {
+            render={(width, height, viewBox) => {
               return (
                 <svg
                   ref={this.svgRef}
                   width={width}
                   height={height}
-                  viewBox={`0 0 ${width} ${height}`}
+                  viewBox={viewBox}
                   xmlns="http://www.w3.org/2000/svg"
                   xmlnsXlink="http://www.w3.org/1999/xlink"
                   onClick={this.handleClick}

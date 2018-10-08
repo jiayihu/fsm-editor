@@ -8,7 +8,7 @@ import { asCSS } from '../../utils/radium';
 type Props = {
   type: 'READONLY' | 'DRAGGING';
   position: Point | null;
-  render: (width: number, height: number) => ReactNode;
+  render: (width: number, height: number, viewBox: string) => ReactNode;
 };
 
 type States =
@@ -23,6 +23,7 @@ type States =
 type State = States & {
   height: number;
   width: number;
+  zoom: number;
 };
 
 export const CanvasResizer = Radium(
@@ -34,7 +35,8 @@ export const CanvasResizer = Radium(
       this.state = {
         type: 'READONLY',
         height: 200,
-        width: 200
+        width: 200,
+        zoom: 1
       };
 
       this.scrollRef = createRef();
@@ -55,7 +57,13 @@ export const CanvasResizer = Radium(
     }
 
     handleDragStart = (axis: 'x' | 'y') => {
-      this.setState({ type: 'DRAGGING', axis, height: this.state.height, width: this.state.width });
+      this.setState({
+        type: 'DRAGGING',
+        axis,
+        height: this.state.height,
+        width: this.state.width,
+        zoom: 1
+      });
 
       window.addEventListener('mousemove', this.handleDragMove);
       window.addEventListener('mouseup', this.handleDragEnd);
@@ -91,14 +99,37 @@ export const CanvasResizer = Radium(
       window.removeEventListener('mousemove', this.handleDragMove);
     };
 
+    handleZoomIn = () => {
+      console.log('zooming in', this.state.zoom);
+      this.setState({ zoom: this.state.zoom + 0.25 });
+    };
+
+    handleZoomOut = () => {
+      console.log('zooming out', this.state.zoom);
+      this.setState({ zoom: this.state.zoom - 0.25 });
+    };
+
     render() {
+      const { width, height, zoom } = this.state;
+      const viewBox = `0 0 ${width / zoom} ${height / zoom}`;
+
       return (
         <div ref={this.scrollRef} style={styles.canvasScroll}>
-          {this.props.render(this.state.width, this.state.height)}
+          {this.props.render(width, height, viewBox)}
           <SVGIcon
             name="resize"
             onMouseDown={() => this.handleDragStart('y')}
-            style={asCSS([styles.verticalHandle, { top: this.state.height }])}
+            style={asCSS([styles.verticalHandle, { top: height }])}
+          />
+          <SVGIcon
+            name="zoomIn"
+            onClick={this.handleZoomIn}
+            style={asCSS([styles.zoom, styles.zoomIn])}
+          />
+          <SVGIcon
+            name="zoomOut"
+            onClick={this.handleZoomOut}
+            style={asCSS([styles.zoom, styles.zoomOut])}
           />
         </div>
       );
@@ -106,7 +137,9 @@ export const CanvasResizer = Radium(
   }
 );
 
-const styles: RadiumStyle<'canvasScroll' | 'horizontalHandle' | 'verticalHandle'> = {
+const styles: RadiumStyle<
+  'canvasScroll' | 'horizontalHandle' | 'verticalHandle' | 'zoom' | 'zoomIn' | 'zoomOut'
+> = {
   canvasScroll: {
     display: 'flex',
     flex: '1 0 auto',
@@ -126,5 +159,18 @@ const styles: RadiumStyle<'canvasScroll' | 'horizontalHandle' | 'verticalHandle'
     position: 'absolute',
     right: '50%',
     transform: `translate(-50%, -100%) rotate(90deg)`
+  },
+  zoom: {
+    cursor: 'pointer',
+    height: theme.spacing.extraLarge,
+    position: 'absolute',
+    right: 0,
+    width: theme.spacing.extraLarge
+  },
+  zoomIn: {
+    top: 0
+  },
+  zoomOut: {
+    top: theme.spacing.extraLarge
   }
 };
