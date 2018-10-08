@@ -16,7 +16,7 @@ export const App = Radium(
             </div>
           </header>
 
-          <main>
+          <main style={styles.main}>
             <Canvas />
           </main>
 
@@ -36,18 +36,22 @@ export const App = Radium(
   }
 );
 
-const styles: RadiumStyle<'app' | 'header' | 'title' | 'container' | 'footer'> = {
+const styles: RadiumStyle<'app' | 'header' | 'main' | 'title' | 'container' | 'footer'> = {
   app: {
     display: 'grid',
     gridTemplateColumns: 'auto',
     gridTemplateRows: 'auto 1fr auto',
-    minHeight: '100vh'
+    height: '100vh'
   },
   header: {
     backgroundColor: theme.colors.primary,
     color: theme.colors.onPrimary,
     padding: `${theme.spacing.large} 0`,
     textAlign: 'center'
+  },
+  main: {
+    display: 'flex',
+    flexDirection: 'column'
   },
   title: {
     margin: `${theme.spacing.medium}px 0`

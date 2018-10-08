@@ -138,8 +138,8 @@ export const SVGState = Radium(
             x={coords.x}
             y={coords.y}
             data-element={ElementType.state}
-            width={fstateStyle.width}
-            height={fstateStyle.height}
+            width={this.state.type === 'EDITING' ? this.state.textWidth : fstateStyle.width}
+            height={this.state.type === 'EDITING' ? this.state.textHeight : fstateStyle.height}
             rx={6}
             ry={6}
             style={asCSS([styles.rect, active && styles.isActiveRect])}

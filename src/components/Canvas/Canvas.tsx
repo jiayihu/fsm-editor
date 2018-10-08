@@ -27,6 +27,7 @@ import { Point } from '../../domain/geometry';
 import { SVGGrid } from '../SVGGrid/SVGGrid';
 import { asCSS } from '../../utils/radium';
 import { theme } from '../../css/theme';
+import { CanvasResizer } from '../CanvasResizer/CanvasResizer';
 
 type Props = {};
 
@@ -328,31 +329,39 @@ export const Canvas = Radium(
               Export as PNG
             </button>
           </div>
-          <svg
-            ref={this.svgRef}
-            width="100%"
-            height="100%"
-            xmlns="http://www.w3.org/2000/svg"
-            xmlnsXlink="http://www.w3.org/1999/xlink"
-            onClick={this.handleClick}
-            onDoubleClick={this.handleDblClick}
-            onMouseMove={this.handleMouseMove}
-            onMouseUp={this.handleMouseUp}
-            onMouseLeave={this.handleMouseLeave}
-            style={styles.canvas}
-          >
-            <defs>
-              {SVGGrid.getDefs()}
-              {Canvas.getDefs()}
-              {SVGTransition.getDefs()}
-            </defs>
+          <CanvasResizer
+            type={this.state.type === 'DRAGGING' ? 'DRAGGING' : 'READONLY'}
+            position={this.state.type === 'DRAGGING' ? this.state.position : null}
+            render={(width, height) => {
+              return (
+                <svg
+                  ref={this.svgRef}
+                  width={width}
+                  height={height}
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                  onClick={this.handleClick}
+                  onDoubleClick={this.handleDblClick}
+                  onMouseMove={this.handleMouseMove}
+                  onMouseUp={this.handleMouseUp}
+                  onMouseLeave={this.handleMouseLeave}
+                  style={styles.canvas}
+                >
+                  <defs>
+                    {SVGGrid.getDefs()}
+                    {Canvas.getDefs()}
+                    {SVGTransition.getDefs()}
+                  </defs>
 
-            <SVGGrid />
+                  <SVGGrid />
 
-            {this.renderFStates(this.state.fstates)}
-            {this.renderFTransitions(this.state.ftransitions)}
-            {this.renderDrawingLine()}
-          </svg>
+                  {this.renderFStates(this.state.fstates)}
+                  {this.renderFTransitions(this.state.ftransitions)}
+                  {this.renderDrawingLine()}
+                </svg>
+              );
+            }}
+          />
         </>
       );
     }
@@ -363,14 +372,14 @@ const styles: RadiumStyle<
   'canvas' | 'toolbar' | 'toolbarBtn' | 'initialArrow' | 'isDeletingChild'
 > = {
   canvas: {
+    flex: '0 0 auto',
     fontFamily:
       "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-    overflow: 'auto',
     userSelect: 'none' /* Disables text selection when dragging */
   },
   toolbar: {
     backgroundColor: theme.colors.primary,
-    paddingBottom: theme.spacing.medium,
+    padding: `${theme.spacing.medium}px 0`,
     textAlign: 'center'
   },
   toolbarBtn: {
