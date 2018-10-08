@@ -8,7 +8,7 @@ import { asCSS } from '../../utils/radium';
 type Props = {
   type: 'READONLY' | 'DRAGGING';
   position: Point | null;
-  render: (width: number | string, height: number | string) => ReactNode;
+  render: (width: number, height: number) => ReactNode;
 };
 
 type States =
@@ -21,8 +21,8 @@ type States =
     };
 
 type State = States & {
-  height: number | string;
-  width: number | string;
+  height: number;
+  width: number;
 };
 
 export const CanvasResizer = Radium(
@@ -33,8 +33,8 @@ export const CanvasResizer = Radium(
       super(props);
       this.state = {
         type: 'READONLY',
-        height: '100%',
-        width: '100%'
+        height: 200,
+        width: 200
       };
 
       this.scrollRef = createRef();
@@ -45,15 +45,11 @@ export const CanvasResizer = Radium(
 
       const rect = this.scrollRef.current.getBoundingClientRect();
 
-      this.setState({ height: rect.height });
+      this.setState({ height: rect.height, width: rect.width });
     }
 
     componentDidUpdate(_: Props, prevState: State) {
-      if (
-        prevState.height !== this.state.height &&
-        this.scrollRef.current &&
-        typeof this.state.height === 'number'
-      ) {
+      if (prevState.height !== this.state.height && this.scrollRef.current) {
         this.scrollRef.current.scrollTop = this.state.height;
       }
     }
