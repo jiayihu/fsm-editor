@@ -1,4 +1,11 @@
-import React, { Component, ReactNode, MouseEvent, CSSProperties, ChangeEvent } from 'react';
+import React, {
+  Component,
+  ReactNode,
+  MouseEvent,
+  CSSProperties,
+  KeyboardEvent,
+  ChangeEvent
+} from 'react';
 import Radium from 'radium';
 import { FTransition } from '../../domain/transition';
 import { getNearestPointInPerimeter } from '../../utils/math/getNearestPointInPerimeter';
@@ -61,6 +68,15 @@ export const SVGTransition = Radium(
       this.setState({ type: 'EDITING', text });
     };
 
+    handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'Escape': {
+          this.setState({ type: 'READONLY' });
+          return;
+        }
+      }
+    };
+
     handleTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
       this.setState({ type: 'EDITING', text: event.target.value });
     };
@@ -104,7 +120,7 @@ export const SVGTransition = Radium(
       const y = Math.min(fromPosition.y, toPosition.y);
 
       return (
-        <foreignObject x={x} y={y} width={width} height={height}>
+        <foreignObject x={x} y={y} width={width} height={height} style={styles.foreignObject}>
           <div {...{ xmlns: 'http://www.w3.org/1999/xhtml' }} style={styles.text}>
             {this.renderText()}
           </div>
@@ -136,14 +152,13 @@ export const SVGTransition = Radium(
       );
 
       return (
-        <g>
+        <g onClick={this.props.onClick} style={this.props.style}>
           <line
             x1={fromPosition.x}
             y1={fromPosition.y}
             x2={toPosition.x}
             y2={toPosition.y}
-            onClick={this.props.onClick}
-            style={asCSS([styles.ftransition, this.props.style])}
+            style={styles.ftransition}
           />
           {this.renderForeignObject(fromPosition, toPosition)}
         </g>
@@ -167,18 +182,31 @@ export const SVGTransition = Radium(
     }
 
     render() {
-      return this.props.type === 'READONLY' ? this.renderTransition() : this.renderDrawingLine();
+      return (
+        <g onKeyDown={this.handleKeyDown}>
+          {this.props.type === 'READONLY' ? this.renderTransition() : this.renderDrawingLine()}
+        </g>
+      );
     }
   }
 );
 
 const styles: RadiumStyle<
-  'ftransition' | 'text' | 'readonlyText' | 'input' | 'markerArrow' | 'isDrawingFtransition'
+  | 'ftransition'
+  | 'foreignObject'
+  | 'text'
+  | 'readonlyText'
+  | 'input'
+  | 'markerArrow'
+  | 'isDrawingFtransition'
 > = {
   ftransition: {
     markerEnd: 'url(#marker-arrow)',
     stroke: theme.colors.secondary,
     strokeWidth: '2px'
+  },
+  foreignObject: {
+    pointerEvents: 'none'
   },
   text: {
     height: '100%',
@@ -189,7 +217,8 @@ const styles: RadiumStyle<
     justifyContent: 'center'
   },
   readonlyText: {
-    backgroundColor: theme.colors.surface
+    backgroundColor: theme.colors.surface,
+    pointerEvents: 'auto'
   },
   /** @TODO: share input styles */
   input: {
@@ -200,6 +229,7 @@ const styles: RadiumStyle<
     color: 'inherit',
     lineHeight: '1',
     padding: '1rem',
+    pointerEvents: 'auto',
     position: 'relative',
     textAlign: 'center',
     verticalAlign: 'top'
